@@ -1,0 +1,94 @@
+version: "3.8"
+services:
+  traefik:
+    image: "traefik:2.9.1"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - traefik-public
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates:/certificates
+      - "${PROJECT_PATH-.}/environment:/app/config"
+    command:
+      - --providers.docker
+      - --providers.docker.watch=true
+      - --providers.docker.constraints=Label(`traefik.constraint-label`,
+        `traefik-public`)
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.swarmmode
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --certificatesresolvers.le.acme.email=qufiwefefwoyn@gmail.com
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --accesslog
+      - --log
+      - --api
+    env_file:
+      - ./.env
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.traefik-public-http.rule=Host(`traefik.${DOMAIN?Variable
+          not set}`)
+        - traefik.http.routers.traefik-public-http.entrypoints=http
+        - traefik.http.routers.traefik-public-http.middlewares=https-redirect
+        - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN?Variable
+          not set}`)
+        - traefik.http.routers.traefik-public-https.entrypoints=https
+        - traefik.http.routers.traefik-public-https.tls=true
+        - traefik.http.routers.traefik-public-https.service=api@internal
+        - traefik.http.routers.traefik-public-https.tls.certresolver=le
+        - traefik.http.services.traefik-public.loadbalancer.server.port=8085
+        # Auth
+        - traefik.http.middlewares.adminauth.basicauth.usersfile=/app/config/adminauth
+        - traefik.http.routers.traefik-public-http.middlewares=adminauth
+        - traefik.http.routers.traefik-public-https.middlewares=adminauth
+
+  db:
+    image: "postgres:15.0"
+    networks:
+      - traefik-public
+    volumes:
+      - sarah-postgres:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    env_file: ./.env
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      # THIS IS UNSAFE!
+      # - POSTGRES_HOST_AUTH_METHOD=trust
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  sarah:
+    # entrypoint: ["bash", "/entrypoint.local.sh"]
+    ports:
+      - 8000:8000
+    build:
+      context: .
+      dockerfile: ./dockerfiles/sarah.dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    networks:
+      - traefik-public
+
+volumes:
+  traefik-public-certificates: null
+  sarah-postgres:
+    external: true
+
+networks:
+  traefik-public:
+    external: false

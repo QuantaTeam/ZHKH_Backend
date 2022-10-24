@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  traefik:
+    profiles: ["extra"]
+
+  sarah:
+    restart: on-failure
+    profiles: ["main"]
+    container_name: sarah_backend
+    volumes:
+      - ./.cache:/app/data
+      - ./.cache/media:/app/media
+      - "${PROJECT_PATH-.}/environment:/app/config"
+    networks:
+      - traefik-public
+    environment:
+      - CONFIG_ENV=devdocker
+
+  db:
+    container_name: sarah_db
+    profiles: ["main", "db"]
+
+  pgweb:
+    profiles: ["main", "db"]
+    entrypoint: ["sh", "-c", "sleep 3 && pgweb --bind=0.0.0.0 --listen=5055"]
+    networks:
+      - traefik-public
+    container_name: pgweb
+    image: sosedoff/pgweb
+    ports:
+      - "5055:5055"
+    env_file:
+      - ./.env
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER?Variable not
+        set}:${POSTGRES_PASSWORD?Variable not
+        set}@sarah_db:5432/${POSTGRES_DB?Variable not set}?sslmode=disable
+
+volumes:
+  sarah-postgres:
+    external: false
+  pgadmin:
+    external: false

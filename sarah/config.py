@@ -11,5 +11,3 @@ class Settings(pydantic.BaseSettings):
 
 
 settings = Settings()
-
-
