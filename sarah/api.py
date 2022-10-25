@@ -3,8 +3,10 @@ import typing
 import fastapi
 
 from sarah import deps
+from sarah.applications import api as applications_api
 
 router: fastapi.APIRouter = fastapi.APIRouter()
+router.include_router(applications_api.router, prefix="/applications")
 
 
 @router.get("/")

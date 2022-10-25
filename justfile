@@ -1,4 +1,6 @@
 up-backend:
+    #!/usr/bin/env bash
+    export POSTGRES_SERVER=localhost
     pdm run uvicorn sarah.main:app --reload
 
 up-db:
@@ -17,6 +19,13 @@ db-migrate:
     -v "$(pwd)"/db/data:/data \
     -u 1000:1000 --network host migrate/migrate \
     -database postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?sslmode=disable -path /migrations up
+
+db-migrate-remote:
+    #!/usr/bin/env bash
+    ssh -tt -o StrictHostKeyChecking=no cto \
+    "docker run --network traefik-public migrate/migrate \
+    -source github://QuantaTeam/ZHKH_Backend/db/migrations \
+    -database postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_SERVER:5432/$POSTGRES_DB?sslmode=disable up"
 
 db-force target:
     docker run -v "$(pwd)"/db/migrations:/migrations --network host migrate/migrate \

@@ -1,6 +1,9 @@
 import typing
+from collections import abc
 
 import fastapi
+from sqlalchemy.ext import asyncio
+from sarah import db
 
 from sarah import main
 
@@ -13,3 +16,8 @@ async def logger(request: fastapi.Request) -> typing.Any:
         path_params=request.path_params,
     )
     return log
+
+
+async def get_async_db() -> abc.AsyncGenerator[asyncio.AsyncSession, None]:
+    async with db.async_session() as session:
+        yield session
