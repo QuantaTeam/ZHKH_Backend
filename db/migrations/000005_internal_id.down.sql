@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE application DROP COLUMN id;
+
+COMMIT;
