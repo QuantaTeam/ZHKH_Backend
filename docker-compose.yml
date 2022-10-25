@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   traefik:
-    image: "traefik:2.9.1"
+    image: "${DOCKER_IMAGE_PREFIX?Variable not set}traefik:2.9.1"
     ports:
       - "80:80"
       - "443:443"
@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-public-certificates:/certificates
-      - "${PROJECT_PATH-.}/environment:/app/config"
+      # - "${PROJECT_PATH-.}/environment:/app/config"
     command:
       - --providers.docker
       - --providers.docker.watch=true
@@ -50,12 +50,12 @@ services:
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
         - traefik.http.services.traefik-public.loadbalancer.server.port=8085
         # Auth
-        - traefik.http.middlewares.adminauth.basicauth.usersfile=/app/config/adminauth
-        - traefik.http.routers.traefik-public-http.middlewares=adminauth
-        - traefik.http.routers.traefik-public-https.middlewares=adminauth
+        # - traefik.http.middlewares.adminauth.basicauth.usersfile=/app/config/adminauth
+        # - traefik.http.routers.traefik-public-http.middlewares=adminauth
+        # - traefik.http.routers.traefik-public-https.middlewares=adminauth
 
   db:
-    image: "postgres:15.0"
+    image: "${DOCKER_IMAGE_PREFIX?Variable not set}postgres:15.0"
     networks:
       - traefik-public
     volumes:
@@ -74,6 +74,7 @@ services:
 
   sarah:
     # entrypoint: ["bash", "/entrypoint.local.sh"]
+    image: '${DOCKER_IMAGE_PREFIX?Variable not set}barklan/sarah:rolling'
     ports:
       - 8000:8000
     build:
@@ -81,8 +82,29 @@ services:
       dockerfile: ./dockerfiles/sarah.dockerfile
       args:
         BUILDKIT_INLINE_CACHE: 1
+        DOCKER_IMAGE_PREFIX: ${DOCKER_IMAGE_PREFIX?Variable not set}
     networks:
       - traefik-public
+    env_file:
+      - ./.env
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.sarah-http.rule=Host(`${DOMAIN?Variable not
+          set}`) && (PathPrefix(`/api/`))
+        - traefik.http.routers.sarah-http.entrypoints=http
+        - traefik.http.routers.sarah-http.middlewares=https-redirect
+        - traefik.http.routers.sarah-https.rule=Host(`${DOMAIN?Variable not
+          set}`) && (PathPrefix(`/api/`))
+        - traefik.http.routers.sarah-https.entrypoints=https
+        - traefik.http.routers.sarah-https.tls=true
+        - traefik.http.routers.sarah-https.tls.certresolver=le
+        - traefik.http.services.sarah.loadbalancer.server.port=8000
 
 volumes:
   traefik-public-certificates: null
