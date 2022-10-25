@@ -74,7 +74,7 @@ services:
 
   sarah:
     # entrypoint: ["bash", "/entrypoint.local.sh"]
-    image: '${DOCKER_IMAGE_PREFIX?Variable not set}barklan/sarah:rolling'
+    image: "${DOCKER_IMAGE_PREFIX?Variable not set}barklan/sarah:rolling"
     ports:
       - 8000:8000
     build:
@@ -96,11 +96,11 @@ services:
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
         - traefik.http.routers.sarah-http.rule=Host(`${DOMAIN?Variable not
-          set}`) && (PathPrefix(`/api/`))
+          set}`) && (PathPrefix(`/api/`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/openapi.json`))
         - traefik.http.routers.sarah-http.entrypoints=http
         - traefik.http.routers.sarah-http.middlewares=https-redirect
         - traefik.http.routers.sarah-https.rule=Host(`${DOMAIN?Variable not
-          set}`) && (PathPrefix(`/api/`))
+          set}`) && (PathPrefix(`/api/`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/openapi.json`))
         - traefik.http.routers.sarah-https.entrypoints=https
         - traefik.http.routers.sarah-https.tls=true
         - traefik.http.routers.sarah-https.tls.certresolver=le
