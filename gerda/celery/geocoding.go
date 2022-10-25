@@ -3,6 +3,7 @@ package celery
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -91,10 +92,10 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 	ticker := time.NewTicker(period)
 	applicationsWithoutGeo := make([]ApplicationGeo, 0)
 	for range ticker.C {
-		query := `--sql
+		query := fmt.Sprintf(`--sql
             select application.id, application."Адрес проблемы", application.geo_coordinates from application
             where application.geo_coordinates is NULL
-            limit 1`
+            limit %d`, conf.SimultaneousGeocodeUpdates)
 		if err := rdb.Select(&applicationsWithoutGeo, query); err != nil {
 			logger.Error("could not get project from db", zap.Error(err))
 			return

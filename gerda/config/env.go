@@ -11,6 +11,8 @@ const prefix = ""
 type Config struct {
 	Secret          string `env:"SECRET" envDefault:"12345"`
 	YandexGeoAPIKey string `env:"YANDEX_GEOCODER_API_KEY,required"`
+	SimultaneousGeocodeUpdates int `env:"SIMULTANEOUS_GEOCODE_UPDATES,required"`
+	GeocodeIntervalMinutes int `env:"GEOCODE_INTERVAL_MINUTES,required"`
 }
 
 func Read() (*Config, error) {
