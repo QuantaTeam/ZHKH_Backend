@@ -87,7 +87,7 @@ services:
 volumes:
   traefik-public-certificates: null
   sarah-postgres:
-    external: true
+    external: false
 
 networks:
   traefik-public:

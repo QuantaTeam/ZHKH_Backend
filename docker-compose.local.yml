@@ -19,6 +19,8 @@ services:
   db:
     container_name: sarah_db
     profiles: ["main", "db"]
+    volumes:
+      - ./db/data:/clientdata
 
   pgweb:
     profiles: ["main", "db"]
