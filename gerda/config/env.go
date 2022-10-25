@@ -9,10 +9,11 @@ import (
 const prefix = ""
 
 type Config struct {
-	Secret          string `env:"SECRET" envDefault:"12345"`
-	YandexGeoAPIKey string `env:"YANDEX_GEOCODER_API_KEY,required"`
-	SimultaneousGeocodeUpdates int `env:"SIMULTANEOUS_GEOCODE_UPDATES,required"`
-	GeocodeIntervalMinutes int `env:"GEOCODE_INTERVAL_MINUTES,required"`
+	Secret                     string `env:"SECRET" envDefault:"12345"`
+	YandexGeoAPIKey            string `env:"YANDEX_GEOCODER_API_KEY,required"`
+	SimultaneousGeocodeUpdates int    `env:"SIMULTANEOUS_GEOCODE_UPDATES,required"`
+	GeocodeIntervalMinutes     int    `env:"GEOCODE_INTERVAL_MINUTES,required"`
+	GeocodeTaskEnabled         bool    `env:"GEOCODE_TASK_ENABLED,required"`
 }
 
 func Read() (*Config, error) {

@@ -92,17 +92,21 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 	ticker := time.NewTicker(period)
 	applicationsWithoutGeo := make([]ApplicationGeo, 0)
 	for range ticker.C {
+		if !conf.GeocodeTaskEnabled {
+			logger.Warn("geocode task disabled, skipping")
+			continue
+		}
 		query := fmt.Sprintf(`--sql
             select application.id, application."Адрес проблемы", application.geo_coordinates from application
             where application.geo_coordinates is NULL
             limit %d`, conf.SimultaneousGeocodeUpdates)
 		if err := rdb.Select(&applicationsWithoutGeo, query); err != nil {
 			logger.Error("could not get project from db", zap.Error(err))
-			return
+			continue
 		}
 		if len(applicationsWithoutGeo) == 0 {
 			logger.Info("all applications are already geocoded, exiting")
-			return
+			continue
 		}
 
 		client := &http.Client{}
@@ -111,7 +115,7 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 			req, err := http.NewRequest(http.MethodGet, "https://geocode-maps.yandex.ru/1.x/", nil)
 			if err != nil {
 				logger.Error("failed to construct external request for geocoding", zap.Error(err))
-				return
+				continue
 			}
 			q := req.URL.Query()
 			q.Add("apikey", conf.YandexGeoAPIKey)
@@ -121,24 +125,24 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 			resp, err := client.Do(req)
 			if err != nil {
 				logger.Info("Errored when sending request to the server")
-				return
+				continue
 			}
 
 			defer resp.Body.Close()
 			responseBody, err := io.ReadAll(resp.Body)
 			if err != nil {
 				logger.Error("failed to read response body", zap.Error(err))
-				return
+				continue
 			}
 			if resp.StatusCode != 200 {
 				logger.Error("Yandex geocode non 200", zap.Int("code", resp.StatusCode))
-				return
+				continue
 			}
 			var respStruct YandexGeoCodeResp
 			err = json.Unmarshal(responseBody, &respStruct)
 			if err != nil {
 				logger.Error("failed to unmarshal json", zap.Error(err))
-				return
+				continue
 			}
 			coordinates := respStruct.Response.GeoObjectCollection.FeatureMember[0].GeoObject.Point.Pos
 
@@ -146,7 +150,7 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 			tx, err := rdb.Begin()
 			if err != nil {
 				logger.Error("failed to create db transaction", zap.Error(err))
-				return
+				continue
 			}
 			update := "update application set geo_coordinates = $1 where application.id = $2"
 			if _, err = tx.Exec(update, coordinates, application.ID); err != nil {
@@ -154,11 +158,11 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 				if e := tx.Rollback(); e != nil {
 					logger.Error("failed to rollback transaction", zap.Error(err))
 				}
-				return
+				continue
 			}
 			if err := tx.Commit(); err != nil {
 				logger.Error("failed to commit tx", zap.Error(err))
-				return
+				continue
 			}
 			logger.Info("One update of coordinates successful", zap.Int64("application_id", application.ID))
 		}
