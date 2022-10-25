@@ -43,3 +43,7 @@ volumes:
     external: false
   pgadmin:
     external: false
+
+networks:
+  traefik-public:
+    external: false

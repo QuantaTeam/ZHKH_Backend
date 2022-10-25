@@ -157,3 +157,5 @@ dmypy.json
 
 ### PDM
 .pdm.toml
+
+/docker-stack.yml
