@@ -38,7 +38,9 @@ async def get_orders(
     if district_code:
         extra_conditions += ' where "Код района" = :district_code '
     base = sqlalchemy.text(
-        "select * from application " + extra_conditions + f" limit {multi.limit} offset {multi.offset}"
+        "select * from application "
+        + extra_conditions
+        + f" limit {multi.limit} offset {multi.offset}"
     )
     base_count = sqlalchemy.text(
         "select count(*) from application "

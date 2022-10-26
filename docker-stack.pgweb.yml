@@ -1,0 +1,43 @@
+version: '3.9'
+
+networks:
+  traefik-public:
+    external: true
+    name: traefik-public
+services:
+  pgweb:
+    deploy:
+      labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.routers.pgweb-http.rule=Host(`pgweb.hack.barklan.com`)
+      - traefik.http.routers.pgweb-http.entrypoints=http
+      - traefik.http.routers.pgweb-http.middlewares=https-redirect
+      - traefik.http.routers.pgweb-https.rule=Host(`pgweb.hack.barklan.com`)
+      - traefik.http.routers.pgweb-https.entrypoints=https
+      - traefik.http.routers.pgweb-https.tls=true
+      - traefik.http.routers.pgweb-https.tls.certresolver=le
+      - traefik.http.services.pgweb.loadbalancer.server.port=8081
+    environment:
+      DATABASE_URL: postgres://sarah:lqz8fgjM4JLYUPf96JxvXefXwhIhEN9hDdEXtqpAy198Fl0d@hack_db:5432/postgres?sslmode=disable
+      DOCKER_IMAGE_PREFIX: registry.gitlab.com/gerda_mirror/backend/
+      DOCKER_REGISTRY: registry.gitlab.com/gerda_mirror/backend
+      DOMAIN: hack.barklan.com
+      GEOCODE_INTERVAL_MINUTES: '1'
+      GEOCODE_TASK_ENABLED: "false"
+      GITHUB_TOKEN: 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
+      GITHUB_TOKEN_NAME: kvanta-read
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: lqz8fgjM4JLYUPf96JxvXefXwhIhEN9hDdEXtqpAy198Fl0d
+      POSTGRES_SERVER: hack_db
+      POSTGRES_USER: sarah
+      REGISTRY_PASSWORD: rdsUmNUNEKHm8Qvxfqhy
+      REGISTRY_USERNAME: gitlab+deploy-token-1449716
+      SIMULTANEOUS_GEOCODE_UPDATES: '1'
+      YANDEX_GEOCODER_API_KEY: 0695c790-ae90-407d-92cd-90eeadd9cf84
+    image: sosedoff/pgweb
+    networks:
+      traefik-public: null
+version: '3.8'
+
