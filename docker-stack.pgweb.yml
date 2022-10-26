@@ -40,4 +40,3 @@ services:
     networks:
       traefik-public: null
 version: '3.8'
-
