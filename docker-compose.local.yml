@@ -26,6 +26,9 @@ services:
     environment:
       - CONFIG_ENV=devdocker
 
+  frontend:
+    profiles: ["extra"]
+
   db:
     container_name: sarah_db
     profiles: ["main", "db"]

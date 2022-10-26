@@ -26,9 +26,11 @@ db-migrate:
 
 db-migrate-remote:
     #!/usr/bin/env bash
-    ssh -tt -o StrictHostKeyChecking=no cto \
+    echo "migrating remote"
+    echo $GITHUB_TOKEN_NAME
+    ssh -tt -o StrictHostKeyChecking=no sbermain \
     "docker run --network traefik-public migrate/migrate \
-    -source github://QuantaTeam/ZHKH_Backend/db/migrations \
+    -source github://$GITHUB_TOKEN_NAME:$GITHUB_TOKEN@QuantaTeam/ZHKH_Backend/db/migrations \
     -database postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_SERVER:5432/$POSTGRES_DB?sslmode=disable up"
 
 db-force target:
