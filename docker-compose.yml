@@ -106,6 +106,27 @@ services:
         - traefik.http.routers.sarah-https.tls.certresolver=le
         - traefik.http.services.sarah.loadbalancer.server.port=8000
 
+  gerda:
+    image: "${DOCKER_IMAGE_PREFIX?Variable not set}barklan/gerda:rolling"
+    build:
+      context: .
+      dockerfile: dockerfiles/gerda.dockerfile
+      args:
+        DOCKER_IMAGE_PREFIX: ${DOCKER_IMAGE_PREFIX?Variable not set}
+    ports:
+      - "8888:8888"
+    networks:
+      - traefik-public
+    env_file:
+      - ./.env
+    environment:
+      # CONFIG_ENV should be one of "dev", "devdocker", "prod"
+      - CONFIG_ENV=prod
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
 volumes:
   traefik-public-certificates: null
   sarah-postgres:

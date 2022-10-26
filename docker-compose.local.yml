@@ -17,6 +17,15 @@ services:
     environment:
       - CONFIG_ENV=devdocker
 
+  gerda:
+    restart: on-failure
+    profiles: ["main"]
+    container_name: gerda_backend
+    networks:
+      - traefik-public
+    environment:
+      - CONFIG_ENV=devdocker
+
   db:
     container_name: sarah_db
     profiles: ["main", "db"]
