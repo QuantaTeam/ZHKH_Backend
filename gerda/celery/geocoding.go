@@ -87,6 +87,16 @@ type ApplicationGeo struct {
 	GeoCoordinates sql.NullString `db:"geo_coordinates"`
 }
 
+func readRespBody(resp *http.Response, logger *zap.Logger) ([]byte, bool) {
+	defer resp.Body.Close()
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("failed to read response body", zap.Error(err))
+		return nil, false
+	}
+	return responseBody, true
+}
+
 // $.response.[0].GeoObject.Point.pos
 func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.Duration) {
 	ticker := time.NewTicker(period)
@@ -127,13 +137,11 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 				logger.Info("Errored when sending request to the server")
 				continue
 			}
-
-			defer resp.Body.Close()
-			responseBody, err := io.ReadAll(resp.Body)
-			if err != nil {
-				logger.Error("failed to read response body", zap.Error(err))
+			responseBody, ok := readRespBody(resp, logger)
+			if !ok {
 				continue
 			}
+
 			if resp.StatusCode != 200 {
 				logger.Error("Yandex geocode non 200", zap.Int("code", resp.StatusCode))
 				continue

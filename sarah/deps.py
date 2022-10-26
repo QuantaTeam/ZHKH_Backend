@@ -3,9 +3,8 @@ from collections import abc
 
 import fastapi
 from sqlalchemy.ext import asyncio
-from sarah import db
 
-from sarah import main
+from sarah import db, main
 
 
 async def logger(request: fastapi.Request) -> typing.Any:

@@ -4,7 +4,11 @@ from sqlalchemy.ext import asyncio
 
 from sarah import config
 
-engine = sqlalchemy.create_engine(config.settings.SQLALCHEMY_DATABASE_URI, pool_pre_ping=True, future=True)  # type: ignore
+engine = sqlalchemy.create_engine(
+    config.settings.SQLALCHEMY_DATABASE_URI,
+    pool_pre_ping=True,
+    future=True,
+)  # type: ignore
 SessionLocal = orm.sessionmaker(
     autocommit=False, autoflush=True, bind=engine, future=True
 )
