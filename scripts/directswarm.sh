@@ -21,6 +21,7 @@ docker-compose push
 just compose-config
 
 ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PATH}/environment"
+ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PATH}/frontend"
 
 scp docker-stack.yml .env "${SSH_SERVER_NAME}:${PROJECT_PATH}/"
 scp -r environment "${SSH_SERVER_NAME}:${PROJECT_PATH}"

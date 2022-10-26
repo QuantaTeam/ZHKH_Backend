@@ -151,14 +151,14 @@ services:
         - traefik.http.routers.frontend-http.rule=Host(`${DOMAIN?Variable not
           set}`) && PathPrefix(`/`) && !PathPrefix(`/api/`) &&
           !PathPrefix(`/docs`) && !PathPrefix(`/redoc`) &&
-          !PathPrefix(`/openapi.json`))
+          !PathPrefix(`/openapi.json`)
         - traefik.http.routers.frontend-http.entrypoints=http
         - traefik.http.services.frontend.loadbalancer.server.port=80
         - traefik.http.routers.frontend-http.middlewares=https-redirect
         - traefik.http.routers.frontend-https.rule=Host(`${DOMAIN?Variable not
           set}`) && PathPrefix(`/`) && !PathPrefix(`/api/`) &&
           !PathPrefix(`/docs`) && !PathPrefix(`/redoc`) &&
-          !PathPrefix(`/openapi.json`))
+          !PathPrefix(`/openapi.json`)
         - traefik.http.routers.frontend-https.entrypoints=https
         - traefik.http.routers.frontend-https.tls=true
         - traefik.http.routers.frontend-https.tls.certresolver=le
