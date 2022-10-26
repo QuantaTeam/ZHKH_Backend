@@ -1,3 +1,4 @@
+---
 version: "3.8"
 services:
   traefik:
@@ -49,10 +50,6 @@ services:
         - traefik.http.routers.traefik-public-https.service=api@internal
         - traefik.http.routers.traefik-public-https.tls.certresolver=le
         - traefik.http.services.traefik-public.loadbalancer.server.port=8085
-        # Auth
-        # - traefik.http.middlewares.adminauth.basicauth.usersfile=/app/config/adminauth
-        # - traefik.http.routers.traefik-public-http.middlewares=adminauth
-        # - traefik.http.routers.traefik-public-https.middlewares=adminauth
 
   db:
     image: "${DOCKER_IMAGE_PREFIX?Variable not set}postgres:15.0"
@@ -97,11 +94,13 @@ services:
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
         - traefik.http.routers.sarah-http.rule=Host(`${DOMAIN?Variable not
-          set}`) && (PathPrefix(`/api/`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/openapi.json`))
+          set}`) && (PathPrefix(`/api/`) || PathPrefix(`/docs`) ||
+          PathPrefix(`/redoc`) || PathPrefix(`/openapi.json`))
         - traefik.http.routers.sarah-http.entrypoints=http
         - traefik.http.routers.sarah-http.middlewares=https-redirect
         - traefik.http.routers.sarah-https.rule=Host(`${DOMAIN?Variable not
-          set}`) && (PathPrefix(`/api/`) || PathPrefix(`/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/openapi.json`))
+          set}`) && (PathPrefix(`/api/`) || PathPrefix(`/docs`) ||
+          PathPrefix(`/redoc`) || PathPrefix(`/openapi.json`))
         - traefik.http.routers.sarah-https.entrypoints=https
         - traefik.http.routers.sarah-https.tls=true
         - traefik.http.routers.sarah-https.tls.certresolver=le

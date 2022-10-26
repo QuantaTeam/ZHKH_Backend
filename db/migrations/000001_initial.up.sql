@@ -1,6 +1,6 @@
 BEGIN;
 
-SET ROLE 'sarah';
+SET ROLE 'sarah'; -- noqa
 
 CREATE TABLE schema_migrations_history (
     id SERIAL PRIMARY KEY NOT NULL,
@@ -20,7 +20,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
 -- TRIGGER
 CREATE TRIGGER track_applied_migrations AFTER INSERT ON schema_migrations

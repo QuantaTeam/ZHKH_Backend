@@ -1,6 +1,6 @@
 BEGIN;
 
-CREATE TABLE application (
+CREATE TABLE application ( -- noqa: disable=L057
     "Корневой ИД заявки" TEXT,
     "ИД версии заявки" TEXT,
     "Номер заявки" TEXT,
@@ -72,4 +72,4 @@ CREATE TABLE application (
     "Признак оплаты картой" TEXT
 );
 
-    COMMIT;
+COMMIT;
