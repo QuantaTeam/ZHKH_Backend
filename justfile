@@ -69,3 +69,6 @@ compose-config:
     -e DOCKER_IMAGE_PREFIX="${DOCKER_IMAGE_PREFIX}" \
     -e PROJECT_PATH="${PROJECT_PATH}" \
     barklan/docker_and_compose:1.2.0 docker-compose -f /data/docker-compose.yml config) > docker-stack.yml
+
+login-to-container-registry:
+    docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}" "${DOCKER_REGISTRY}"
