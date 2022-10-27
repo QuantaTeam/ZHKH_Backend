@@ -159,3 +159,5 @@ dmypy.json
 .pdm.toml
 
 /docker-stack.yml
+
+/temp.ipynb

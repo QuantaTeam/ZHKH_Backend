@@ -1,7 +1,11 @@
+import math
 import typing
+from datetime import datetime
 
 import fastapi
 import sqlalchemy
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext import asyncio as aorm
 
 from sarah import deps
@@ -9,11 +13,52 @@ from sarah import deps
 router: fastapi.APIRouter = fastapi.APIRouter()
 
 
+def apply_where_filters(
+    statement: typing.Any, filters: dict[str, str | None]
+) -> typing.Any:
+    parameter_count = 0
+    for column, parameter_value in filters.items():
+        parameter_count += 1
+        parameter_name = f"user_param_{str(parameter_count)}"
+        if parameter_value:
+            statement = statement.where(
+                sa.text(f'"{column}" = :{parameter_name}').bindparams(
+                    sa.bindparam(parameter_name, value=parameter_value, type_=sa.String)
+                )
+            )
+    return statement
+
+
+def apply_time_filters(
+    statement: typing.Any,
+    filters: list[tuple[str, datetime | None, str]],
+    table_name: str,
+) -> typing.Any:
+    parameter_count = 0
+    for rule in filters:
+        column, parameter_value, operator = rule
+        parameter_count += 1
+        parameter_name = f"user_time_param_{str(parameter_count)}"
+        if parameter_value:
+            statement = statement.where(
+                sa.text(
+                    f"{table_name}.{column} {operator} :{parameter_name}"
+                ).bindparams(
+                    sa.bindparam(
+                        parameter_name,
+                        value=parameter_value,
+                        type_=postgresql.TIMESTAMP(timezone=True),
+                    )
+                )
+            )
+    return statement
+
+
 @router.get(
     "/",
     summary="Get multiple applications",
 )
-async def get_orders(
+async def get_applications(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
     log: typing.Any = fastapi.Depends(deps.logger),
@@ -25,8 +70,36 @@ async def get_orders(
     type_of_work_performed: str | None = fastapi.Query(default=None),
     # Код района
     district_code: str | None = fastapi.Query(default=None),
+    creation_timestamp_start: datetime | None = fastapi.Query(default=None),
+    creation_timestamp_end: datetime | None = fastapi.Query(default=None),
+    closure_timestamp_start: datetime | None = fastapi.Query(default=None),
+    closure_timestamp_end: datetime | None = fastapi.Query(default=None),
 ) -> typing.Any:
-    return {}
+    filters = {
+        "Наименование категории дефекта": defect_category_name,
+        "Вид выполненных работ": type_of_work_performed,
+        "Код района": district_code,
+    }
+    time_filters = [
+        ("application_creation_timestamp", creation_timestamp_start, ">"),
+        ("application_creation_timestamp", creation_timestamp_end, "<"),
+        ("application_closure_timestamp", closure_timestamp_start, ">"),
+        ("application_closure_timestamp", closure_timestamp_end, "<"),
+    ]
+    statement = sa.select(sa.text("* from application"))
+    statement_count = sa.select(sa.text("count(*) from application"))
+    statement = apply_where_filters(statement, filters)
+    statement_count = apply_where_filters(statement_count, filters)
+    statement = apply_time_filters(statement, time_filters, "application")
+    statement_count = apply_time_filters(statement_count, time_filters, "application")
+
+    statement = statement.limit(multi.limit).offset(multi.offset)
+    res_raw = await db.execute(statement)
+    res = res_raw.mappings().all()
+    res_count_raw = await db.execute(statement_count)
+    res_count = res_count_raw.scalar_one()
+    count_pages = math.ceil(res_count / multi.limit)
+    return {"res": res, "count_pages": count_pages}
 
 
 @router.get(
