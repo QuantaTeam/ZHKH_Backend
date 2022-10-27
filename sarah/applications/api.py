@@ -18,7 +18,7 @@ async def get_applications(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
     log: typing.Any = fastapi.Depends(deps.logger),
-    multi: deps.Multi = fastapi.Depends(),
+    pagination: deps.Pagination = fastapi.Depends(),
     is_anomaly: bool | None = fastapi.Query(default=None),
     # Наименование категории дефекта
     defect_category_name: str | None = fastapi.Query(default=None),
@@ -40,12 +40,12 @@ async def get_applications(
     base = sqlalchemy.text(
         "select * from application "
         + extra_conditions
-        + f" limit {multi.limit} offset {multi.offset}"
+        + f" limit {pagination.limit} offset {pagination.offset}"
     )
     base_count = sqlalchemy.text(
         "select count(*) from application "
         + extra_conditions
-        + f" limit {multi.limit} offset {multi.offset}"
+        + f" limit {pagination.limit} offset {pagination.offset}"
     )
     params = {}
     if defect_category_name:
@@ -63,7 +63,7 @@ async def get_applications(
     applications = applications_res.mappings().all()
     applications_count_res = await db.execute(base_count)
     applications_count = applications_count_res.scalar_one()
-    count_pages = math.ceil(applications_count / multi.limit)
+    count_pages = math.ceil(applications_count / pagination
     return {"result": applications, "count_pages": count_pages}
 
 

@@ -22,7 +22,7 @@ async def get_async_db() -> abc.AsyncGenerator[asyncio.AsyncSession, None]:
         yield session
 
 
-class Multi:
+class Pagination:
     def __init__(
         self,
         skip: int = fastapi.Query(0, title="SQL's OFFSET.", ge=0, le=1000000),
