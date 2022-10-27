@@ -14,7 +14,7 @@ router: fastapi.APIRouter = fastapi.APIRouter()
     "/",
     summary="Get multiple applications",
 )
-async def get_orders(
+async def get_applications(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
     log: typing.Any = fastapi.Depends(deps.logger),
@@ -28,7 +28,7 @@ async def get_orders(
     district_code: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
     extra_conditions = ""
-    sql_where_init = False
+
     if defect_category_name:
         extra_conditions += (
             ' where "Наименование категории дефекта" = :defect_category_name '
@@ -55,9 +55,8 @@ async def get_orders(
     if district_code:
         params["district_code"] = district_code
 
-    print(params)
     base = base.bindparams(**params)
-    print(base)
+
     base_count = base_count.bindparams(**params)
 
     applications_res = await db.execute(base)
@@ -70,7 +69,7 @@ async def get_orders(
 
 @router.get(
     "/anomalies",
-    summary="Get multiple applications",
+    summary="Get multiple anomaly applications",
 )
 async def anomalies(
     *,
@@ -92,7 +91,7 @@ async def anomalies(
 
 @router.get(
     "/{application_id}",
-    summary="Get one application",
+    summary="Get one application by id",
 )
 async def one_application(
     *,
