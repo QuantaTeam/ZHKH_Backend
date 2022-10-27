@@ -15,6 +15,10 @@ up-db:
 down-db:
     docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db down
 
+up-jupyter:
+    bash -c ". .venv/bin/activate && pdm sync && jupyter lab -y --log-level=40 --port=8895 --ip=0.0.0.0 --allow-root --NotebookApp.token='' \
+    --NotebookApp.password='' --NotebookApp.custom_display_url=http://127.0.0.1:8895/lab/tree/temp.ipynb"
+
 pgcli:
     pgcli postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB
 
