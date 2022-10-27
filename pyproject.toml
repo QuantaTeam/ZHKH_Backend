@@ -42,8 +42,5 @@ test = [
     "black>=22.10.0",
 ]
 
-[tool.pyright]
-extraPaths = ["__pypackages__/3.10/lib/"]
-
 [tool.bandit]
 exclude_dirs = ["tests", "gunicorn_conf.py"]
