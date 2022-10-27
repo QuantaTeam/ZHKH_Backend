@@ -26,7 +26,7 @@ func OpenDB() (*sqlx.DB, error) {
 	db, err := sqlx.Connect(
 		"postgres",
 		fmt.Sprintf(
-            "postgres://%s:%s@%s:5432/%s?sslmode=disable",
+			"postgres://%s:%s@%s:5432/%s?sslmode=disable",
 			cfg.User,
 			cfg.Password,
 			cfg.Host,

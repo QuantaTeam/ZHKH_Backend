@@ -1,4 +1,3 @@
-import math
 import typing
 
 import fastapi
@@ -27,45 +26,7 @@ async def get_orders(
     # Код района
     district_code: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
-    extra_conditions = ""
-    sql_where_init = False
-    if defect_category_name:
-        extra_conditions += (
-            ' where "Наименование категории дефекта" = :defect_category_name '
-        )
-    if type_of_work_performed:
-        extra_conditions += ' where "Вид выполненных работ" = :type_of_work_performed '
-    if district_code:
-        extra_conditions += ' where "Код района" = :district_code '
-    base = sqlalchemy.text(
-        "select * from application "
-        + extra_conditions
-        + f" limit {multi.limit} offset {multi.offset}"
-    )
-    base_count = sqlalchemy.text(
-        "select count(*) from application "
-        + extra_conditions
-        + f" limit {multi.limit} offset {multi.offset}"
-    )
-    params = {}
-    if defect_category_name:
-        params["defect_category_name"] = defect_category_name
-    if type_of_work_performed:
-        params["type_of_work_performed"] = type_of_work_performed
-    if district_code:
-        params["district_code"] = district_code
-
-    print(params)
-    base = base.bindparams(**params)
-    print(base)
-    base_count = base_count.bindparams(**params)
-
-    applications_res = await db.execute(base)
-    applications = applications_res.mappings().all()
-    applications_count_res = await db.execute(base_count)
-    applications_count = applications_count_res.scalar_one()
-    count_pages = math.ceil(applications_count / multi.limit)
-    return {"result": applications, "count_pages": count_pages}
+    return {}
 
 
 @router.get(

@@ -1,3 +1,5 @@
+import typing
+
 import fastapi
 import structlog
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +13,7 @@ origins = [
 ]
 
 
-shared_processors = []
+shared_processors: list[typing.Any] = []
 
 if config.settings.DEBUG:
     processors = shared_processors + [

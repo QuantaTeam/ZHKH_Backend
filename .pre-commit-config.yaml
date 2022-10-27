@@ -10,19 +10,11 @@ repos:
       - id: trailing-whitespace
       - id: check-merge-conflict
       - id: check-toml
-      - id: check-yaml
       - id: detect-private-key
       - id: check-json
         exclude: ".vscode/tasks.json"
       - id: check-case-conflict
       - id: check-symlinks
-      - id: mixed-line-ending
-        args: ["--fix=no"]
-  - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.28.0
-    hooks:
-      - id: yamllint
-        args: [--format, parsable, --strict]
   - repo: https://github.com/jorisroovers/gitlint
     rev: v0.17.0
     hooks:
@@ -59,7 +51,7 @@ repos:
     rev: v3.0.0-alpha.3
     hooks:
       - id: prettier
-        types_or: [css, javascript, ts, vue, html, scss, yaml]
+        types_or: [css, javascript, ts, vue, html, scss]
   - repo: local
     hooks:
       - id: dotenv-linter

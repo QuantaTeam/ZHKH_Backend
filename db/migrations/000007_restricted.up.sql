@@ -1,5 +1,5 @@
 BEGIN;
-CREATE TABLE restricted_repeated_applications(
+CREATE TABLE restricted_repeated_applications( -- noqa: disable=L057
     "Идентификат" TEXT,
     "Корневой идентификат" TEXT,
     "Наименование" TEXT,

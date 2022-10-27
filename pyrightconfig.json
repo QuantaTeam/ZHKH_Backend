@@ -1,5 +1,5 @@
 {
-    "typeCheckingMode": "strict",
+    "typeCheckingMode": "basic",
     "extraPaths": [
         "__pypackages__/3.10/lib/"
     ],
