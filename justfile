@@ -3,13 +3,17 @@ set dotenv-load
 up-sarah:
     #!/usr/bin/env bash
     export POSTGRES_SERVER=localhost
+    export DEBUG=true
     pdm run uvicorn sarah.main:app --reload
 
 up-gerda:
     go run ./cmd/gerda
 
 up-db:
-    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build
+    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build -d
+
+down-db:
+    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db down
 
 pgcli:
     pgcli postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB

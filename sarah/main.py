@@ -3,6 +3,21 @@ import structlog
 
 from sarah import api, config
 
+shared_processors = []
+
+if config.settings.DEBUG:
+    processors = shared_processors + [
+        structlog.dev.ConsoleRenderer(),
+    ]
+else:
+    processors = shared_processors + [
+        structlog.processors.dict_tracebacks,
+        structlog.processors.JSONRenderer(),
+    ]
+
+structlog.configure(processors)
+
+
 logger = structlog.get_logger()
 
 app = fastapi.FastAPI(
