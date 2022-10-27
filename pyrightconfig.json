@@ -7,5 +7,10 @@
         "**/.venv",
         "**/__pycache__"
     ],
+    "ignore": [
+        "**/.venv",
+        "**/__pycache__",
+        "**/__pypackages__"
+    ],
     "reportUnknownVariableType": false
 }
