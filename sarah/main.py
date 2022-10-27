@@ -1,7 +1,15 @@
 import fastapi
 import structlog
+from fastapi.middleware.cors import CORSMiddleware
 
 from sarah import api, config
+
+origins = [
+    "*",
+    "https://hack.barklan.com",
+    "http://localhost",
+]
+
 
 shared_processors = []
 
@@ -23,6 +31,14 @@ logger = structlog.get_logger()
 app = fastapi.FastAPI(
     title=config.settings.PROJECT_NAME,
     debug=config.settings.DEBUG,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

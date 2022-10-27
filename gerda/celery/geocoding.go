@@ -108,7 +108,7 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 		}
 		query := fmt.Sprintf(`--sql
             select application.id, application."Адрес проблемы", application.geo_coordinates from application
-            where application.geo_coordinates is NULL
+            where application.geo_coordinates is NULL and application.is_anomaly = true
             limit %d`, conf.SimultaneousGeocodeUpdates)
 		if err := rdb.Select(&applicationsWithoutGeo, query); err != nil {
 			logger.Error("could not get project from db", zap.Error(err))

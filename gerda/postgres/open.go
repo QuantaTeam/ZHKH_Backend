@@ -13,7 +13,7 @@ type PGConnectionData struct {
 	DB       string `env:"POSTGRES_DB"`
 	Password string `env:"POSTGRES_PASSWORD"`
 	User     string `env:"POSTGRES_USER"`
-	Host     string `env:"POSTGRES_HOST"`
+	Host     string `env:"POSTGRES_SERVER"`
 }
 
 func OpenDB() (*sqlx.DB, error) {
@@ -26,7 +26,7 @@ func OpenDB() (*sqlx.DB, error) {
 	db, err := sqlx.Connect(
 		"postgres",
 		fmt.Sprintf(
-			"postgres://%s:%s@%s/%s?sslmode=disable",
+            "postgres://%s:%s@%s:5432/%s?sslmode=disable",
 			cfg.User,
 			cfg.Password,
 			cfg.Host,
