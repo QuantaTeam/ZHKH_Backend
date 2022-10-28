@@ -1,5 +1,5 @@
 BEGIN;
 
-ALTER TABLE application ADD COLUMN geo_coordinates TEXT;
+ALTER TABLE application ADD COLUMN geo_coordinates REAL [];
 
 COMMIT;

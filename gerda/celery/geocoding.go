@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
+    "github.com/lib/pq"
 
 	"github.com/QuantaTeam/ZHKH_Backend/gerda/config"
 )
@@ -153,6 +156,10 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 				continue
 			}
 			coordinates := respStruct.Response.GeoObjectCollection.FeatureMember[0].GeoObject.Point.Pos
+			coordinatesArr := strings.Split(coordinates, " ")
+			coordinatesFloats := make([]float64, 2)
+			coordinatesFloats[0], _ = strconv.ParseFloat(coordinatesArr[0], 64)
+			coordinatesFloats[1], _ = strconv.ParseFloat(coordinatesArr[1], 64)
 
 			logger.Info("opening tx for geocoding", zap.Int("number", len(applicationsWithoutGeo)))
 			tx, err := rdb.Begin()
@@ -161,7 +168,7 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 				continue
 			}
 			update := "update application set geo_coordinates = $1 where application.id = $2"
-			if _, err = tx.Exec(update, coordinates, application.ID); err != nil {
+			if _, err = tx.Exec(update, pq.Array(coordinatesFloats), application.ID); err != nil {
 				logger.Error("failed to update geo coordinates", zap.Error(err))
 				if e := tx.Rollback(); e != nil {
 					logger.Error("failed to rollback transaction", zap.Error(err))

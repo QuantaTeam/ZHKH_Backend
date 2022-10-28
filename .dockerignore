@@ -1,4 +1,6 @@
 **/vendor
+**/.venv
+**/__pypackages__
 **/.cache
 **/environment
 **/__pycache__
@@ -26,4 +28,7 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+**/*.csv
+**/*.tar.gz
+**/*.ipynb
 README.md
