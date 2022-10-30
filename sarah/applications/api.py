@@ -52,7 +52,6 @@ def apply_time_filters(
 
 @router.get(
     "/",
-    summary="Get multiple applications",
 )
 async def get_applications(
     *,
@@ -106,7 +105,6 @@ async def get_applications(
 
 @router.get(
     "/anomalies",
-    summary="Get multiple applications",
 )
 async def anomalies(
     *,
@@ -115,7 +113,7 @@ async def anomalies(
 ) -> typing.Any:
     query = await db.execute(
         sqlalchemy.text(
-            "select id, geo_coordinates from application where geo_coordinates is not NULL and is_anomaly = true"
+            'select id, geo_coordinates, "Наименование дефекта" from application where geo_coordinates is not NULL and is_anomaly = true'
         )
     )
     applications = query.mappings().all()
@@ -136,7 +134,9 @@ async def meta(
     log: typing.Any = fastapi.Depends(deps.logger),
 ) -> typing.Any:
     defect_category_name_query = await db.execute(
-        sqlalchemy.text('select distinct "Наименование категории дефекта" from application')
+        sqlalchemy.text(
+            'select distinct "Наименование категории дефекта" from application'
+        )
     )
     defect_category_name = defect_category_name_query.scalars().all()
 
@@ -178,3 +178,26 @@ async def one_application(
             404, f"Application with {application_id} id not found."
         )
     return application[0]
+
+
+# @router.get(
+#     "/search",
+#     summary="Search",
+# )
+# async def search(
+#     *,
+#     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
+#     log: typing.Any = fastapi.Depends(deps.logger),
+#     query: str = fastapi.Query(...),
+# ) -> typing.Any:
+#     query = await db.execute(
+#         sqlalchemy.text(
+#             "select * from application where application.id = :application_id"
+#         ).bindparams(application_id=application_id)
+#     )
+#     application = query.mappings().all()
+#     if application is None or len(application) == 0:
+#         raise fastapi.HTTPException(
+#             404, f"Application with {application_id} id not found."
+#         )
+#     return application[0]

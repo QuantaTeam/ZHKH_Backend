@@ -36,7 +36,7 @@ class Multi:
     def __init__(
         self,
         skip: int = fastapi.Query(0, title="SQL's OFFSET.", ge=0, le=1000000),
-        limit: int = fastapi.Query(12, title="SQL's LIMIT.", ge=0, le=50),
+        limit: int = fastapi.Query(12, title="SQL's LIMIT.", ge=0, le=100_000_000),
     ):
         self.offset = skip
         self.limit = limit
