@@ -159,8 +159,8 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 			coordinates := respStruct.Response.GeoObjectCollection.FeatureMember[0].GeoObject.Point.Pos
 			coordinatesArr := strings.Split(coordinates, " ")
 			coordinatesFloats := make([]float64, 2)
-			coordinatesFloats[0], _ = strconv.ParseFloat(coordinatesArr[0], 64)
-			coordinatesFloats[1], _ = strconv.ParseFloat(coordinatesArr[1], 64)
+			coordinatesFloats[0], _ = strconv.ParseFloat(coordinatesArr[1], 64)
+			coordinatesFloats[1], _ = strconv.ParseFloat(coordinatesArr[0], 64)
 
 			logger.Info("opening tx for geocoding", zap.Int("number", len(applicationsWithoutGeo)))
 			tx, err := rdb.Begin()
