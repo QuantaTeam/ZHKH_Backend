@@ -5,7 +5,6 @@ CREATE TABLE application ( -- noqa: disable=L057
     "ИД версии заявки" TEXT,
     "Номер заявки" TEXT,
     "Уникальный номер обращения ГУ (mos.ru)" TEXT,
-    "Extra number" TEXT,
     "Дата создания заявки в формате Timezone" TEXT,
     "Дата начала действия версии заявки в формате Timezone" TEXT,
     "Наименование источника поступления заявки" TEXT,

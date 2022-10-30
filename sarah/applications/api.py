@@ -14,16 +14,16 @@ router: fastapi.APIRouter = fastapi.APIRouter()
 
 
 def apply_where_filters(
-    statement: typing.Any, filters: dict[str, str | None]
+    statement: typing.Any, filters: dict[str, list[str] | None]
 ) -> typing.Any:
     parameter_count = 0
     for column, parameter_value in filters.items():
-        parameter_count += 1
-        parameter_name = f"user_param_{str(parameter_count)}"
         if parameter_value:
+            parameter_count += 1
+            parameter_name = f"user_param_{str(parameter_count)}"
             statement = statement.where(
-                sa.text(f'"{column}" = :{parameter_name}').bindparams(
-                    sa.bindparam(parameter_name, value=parameter_value, type_=sa.String)
+                sa.text(f'"{column}" in :{parameter_name}').bindparams(
+                    sa.bindparam(parameter_name, value=parameter_value)
                 )
             )
     return statement
@@ -65,11 +65,11 @@ async def get_applications(
     multi: deps.Multi = fastapi.Depends(),
     is_anomaly: bool | None = fastapi.Query(default=None),
     # Наименование категории дефекта
-    defect_category_name: str | None = fastapi.Query(default=None),
+    defect_category_name: typing.List[str] | None = fastapi.Query(default=None),
     # Вид выполненных работ
-    type_of_work_performed: str | None = fastapi.Query(default=None),
+    type_of_work_performed: typing.List[str] | None = fastapi.Query(default=None),
     # Код района
-    district_code: str | None = fastapi.Query(default=None),
+    district_code: typing.List[str] | None = fastapi.Query(default=None),
     creation_timestamp_start: datetime | None = fastapi.Query(default=None),
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
     closure_timestamp_start: datetime | None = fastapi.Query(default=None),

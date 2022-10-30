@@ -1,8 +1,8 @@
 BEGIN;
 
 COPY application
-FROM '/clientdata/sample10000dollar.csv' -- noqa
+FROM '/clientdata/shit3.csv' -- noqa
 DELIMITER '$'
-CSV;
+CSV HEADER;
 
 COMMIT;

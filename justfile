@@ -12,8 +12,8 @@ up-gerda:
 up-db:
     docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build -d
 
-down-db:
-    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db down
+down-db *extra_flags:
+    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db down {{extra_flags}}
 
 up-jupyter:
     bash -c ". .venv/bin/activate && pdm sync && jupyter lab -y --log-level=40 --port=8895 --ip=0.0.0.0 --allow-root --NotebookApp.token='' \
