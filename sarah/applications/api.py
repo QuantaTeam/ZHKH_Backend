@@ -135,31 +135,10 @@ async def meta(
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
     log: typing.Any = fastapi.Depends(deps.logger),
 ) -> typing.Any:
-    defect_category_name = [
-        "Благоустройство",
-        "Вентиляция",
-        "Водосчетчики",
-        "Дезинсекция",
-        "Дератизация",
-        "Домофоны (запирающие устройства)",
-        "Другое",
-        "Зимние виды работ",
-        "Канализация",
-        "Кровля",
-        "Лифты",
-        "Освещение",
-        "Отопление",
-        "Плотницкие, слесарные работы",
-        "Подъемные платформы для инвалидов",
-        "Сантехника",
-        "Системы ДУ и ППА ",
-        "Содержание общедомовых помещений",
-        "Уборка",
-        "Уличное освещение",
-        "Фасадные работы",
-        "Электрика",
-        "Электроплиты",
-    ]
+    defect_category_name_query = await db.execute(
+        sqlalchemy.text('select distinct "Вид выполненных работ" from application')
+    )
+    defect_category_name = defect_category_name_query.scalars().all()
 
     type_of_work_performed_query = await db.execute(
         sqlalchemy.text('select distinct "Вид выполненных работ" from application')
@@ -170,6 +149,7 @@ async def meta(
         sqlalchemy.text('select distinct "Вид выполненных работ" from application')
     )
     district_code = district_code_query.scalars().all()
+
     return {
         "defect_category_name": defect_category_name,
         "type_of_work_performed": type_of_work_performed,
