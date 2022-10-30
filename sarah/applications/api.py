@@ -136,7 +136,7 @@ async def meta(
     log: typing.Any = fastapi.Depends(deps.logger),
 ) -> typing.Any:
     defect_category_name_query = await db.execute(
-        sqlalchemy.text('select distinct "Вид выполненных работ" from application')
+        sqlalchemy.text('select distinct "Наименование категории дефекта" from application')
     )
     defect_category_name = defect_category_name_query.scalars().all()
 
@@ -146,7 +146,7 @@ async def meta(
     type_of_work_performed = type_of_work_performed_query.scalars().all()
 
     district_code_query = await db.execute(
-        sqlalchemy.text('select distinct "Вид выполненных работ" from application')
+        sqlalchemy.text('select distinct "Код района" from application')
     )
     district_code = district_code_query.scalars().all()
 
