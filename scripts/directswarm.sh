@@ -25,7 +25,7 @@ ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PAT
 
 scp docker-stack.yml .env "${SSH_SERVER_NAME}:${PROJECT_PATH}/"
 scp -r environment "${SSH_SERVER_NAME}:${PROJECT_PATH}"
-scp -r db "${SSH_SERVER_NAME}:${PROJECT_PATH}"
+rsync -azvc --delete db "${SSH_SERVER_NAME}:${PROJECT_PATH}"
 
 ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" \
 	"docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} ${DOCKER_REGISTRY} \
