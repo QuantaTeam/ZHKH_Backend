@@ -73,9 +73,3 @@ compose-config:
 login-to-container-registry:
     docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}" "${DOCKER_REGISTRY}"
 
-dataset:
-    #!/usr/bin/env bash
-    echo "please wait ..."
-    tar -xf ./hackfull.tar.gz
-    # tail -n +2 "hackfull.csv" > "hackfull.csv.tmp" && mv "hackfull.csv.tmp" "hackfull.csv"
-    # mv hackfull.csv ./db/data/hackfull.csv
