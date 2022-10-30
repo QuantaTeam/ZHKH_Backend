@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	writeFile, err := os.Create("shit3.csv")
+	writeFile, err := os.Create("sample_500_000.csv")
 	if err != nil {
 		log.Println(err)
 	}
@@ -23,7 +23,7 @@ func main() {
 	w := bufio.NewWriter(writeFile)
 
 	lineNumber := 1
-	limit := 100_000_000
+	limit := 500_000
 	numberOfColumns := 0
 	numberOfViolatingLines := 0
 	for fileScanner.Scan() {

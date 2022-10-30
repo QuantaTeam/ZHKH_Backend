@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"go.uber.org/zap"
-    "github.com/lib/pq"
 
 	"github.com/QuantaTeam/ZHKH_Backend/gerda/config"
 )
@@ -134,6 +134,7 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 			q.Add("apikey", conf.YandexGeoAPIKey)
 			q.Add("format", "json")
 			q.Add("geocode", application.Adress)
+			q.Add("bbox", "55.317174,36.974767~56.191308,38.319588")
 			req.URL.RawQuery = q.Encode()
 			resp, err := client.Do(req)
 			if err != nil {

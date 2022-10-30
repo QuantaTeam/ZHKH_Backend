@@ -2,6 +2,7 @@ import typing
 from collections import abc
 
 import fastapi
+from sqlalchemy import orm
 from sqlalchemy.ext import asyncio
 
 from sarah import db, main
@@ -20,6 +21,15 @@ async def logger(request: fastapi.Request) -> typing.Any:
 async def get_async_db() -> abc.AsyncGenerator[asyncio.AsyncSession, None]:
     async with db.async_session() as session:
         yield session
+
+
+def get_db() -> abc.Generator[orm.Session, None, None]:
+    """Get db Session"""
+    try:
+        session = db.SessionLocal()
+        yield session
+    finally:
+        session.close()
 
 
 class Multi:

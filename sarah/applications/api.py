@@ -21,11 +21,7 @@ def apply_where_filters(
         if parameter_value:
             parameter_count += 1
             parameter_name = f"user_param_{str(parameter_count)}"
-            statement = statement.where(
-                sa.text(f'"{column}" in :{parameter_name}').bindparams(
-                    sa.bindparam(parameter_name, value=parameter_value)
-                )
-            )
+            statement = statement.where(sa.Column(column).in_(parameter_value))
     return statement
 
 
@@ -92,6 +88,12 @@ async def get_applications(
     statement_count = apply_where_filters(statement_count, filters)
     statement = apply_time_filters(statement, time_filters, "application")
     statement_count = apply_time_filters(statement_count, time_filters, "application")
+
+    if is_anomaly is not None:
+        statement = statement.where(sa.Column("is_anomaly").__eq__(is_anomaly))
+        statement_count = statement_count.where(
+            sa.Column("is_anomaly").__eq__(is_anomaly)
+        )
 
     statement = statement.limit(multi.limit).offset(multi.offset)
     res_raw = await db.execute(statement)
