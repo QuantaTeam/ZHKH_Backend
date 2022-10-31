@@ -18,6 +18,8 @@ dependencies = [
     "structlog>=22.1.0",
     "psycopg2-binary>=2.9.5",
     "python-json-logger>=2.0.4",
+    "redis>=4.3.4",
+    "fastapi-cache2[redis]>=0.1.9",
 ]
 requires-python = ">=3.10"
 license = {text = "MIT"}

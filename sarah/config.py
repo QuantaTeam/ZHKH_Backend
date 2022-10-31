@@ -47,6 +47,8 @@ class Settings(pydantic.BaseSettings):
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
 
+    REDIS_SERVER: str
+
     class Config:
         case_sensitive = True
 

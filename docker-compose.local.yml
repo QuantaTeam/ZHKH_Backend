@@ -33,6 +33,10 @@ services:
     container_name: sarah_db
     profiles: ["main", "db"]
 
+  redis:
+    container_name: sarah_redis
+    profiles: ["main", "db"]
+
   pgweb:
     profiles: ["main", "db"]
     entrypoint: ["sh", "-c", "sleep 3 && pgweb --bind=0.0.0.0 --listen=5055"]

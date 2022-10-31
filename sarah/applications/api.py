@@ -8,6 +8,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext import asyncio as aorm
 
+from fastapi_cache.decorator import cache
+
 from sarah import deps
 
 router: fastapi.APIRouter = fastapi.APIRouter()
@@ -52,8 +54,8 @@ def apply_time_filters(
 
 @router.get(
     "/",
-    summary="Get multiple applications",
 )
+@cache(expire=300)
 async def get_applications(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
@@ -66,15 +68,31 @@ async def get_applications(
     type_of_work_performed: typing.List[str] | None = fastapi.Query(default=None),
     # Код района
     district_code: typing.List[str] | None = fastapi.Query(default=None),
+    # Наименование района
+    district_name: list[str] | None = fastapi.Query(default=None),
+    # Наименование управляющей компани
+    name_of_the_management_company: list[str] | None = fastapi.Query(default=None),
+    # Наименование обслуживавшей орган
+    name_of_the_service_organization: list[str] | None = fastapi.Query(default=None),
+    # Наименование источника поступлен
+    source_name: list[str] | None = fastapi.Query(default=None),
+    # Оценка качества выполнения работ
+    quality_evaluation: list[str] | None = fastapi.Query(default=None),
     creation_timestamp_start: datetime | None = fastapi.Query(default=None),
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
     closure_timestamp_start: datetime | None = fastapi.Query(default=None),
     closure_timestamp_end: datetime | None = fastapi.Query(default=None),
+    query: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
         "Наименование категории дефекта": defect_category_name,
         "Вид выполненных работ": type_of_work_performed,
         "Код района": district_code,
+        "Наименование района": district_name,
+        "Наименование управляющей компани": name_of_the_management_company,
+        "Наименование обслуживавшей орган": name_of_the_service_organization,
+        "Наименование источника поступлен": source_name,
+        "Оценка качества выполнения работ": quality_evaluation,
     }
     time_filters = [
         ("application_creation_timestamp", creation_timestamp_start, ">"),
@@ -95,6 +113,24 @@ async def get_applications(
             sa.Column("is_anomaly").__eq__(is_anomaly)
         )
 
+    if query is not None and len(query) > 0:
+        statement = statement.where(
+            sa.text(f"\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
+                sa.bindparam(
+                    "query_param",
+                    value=query,
+                )
+            )
+        )
+        statement_count = statement_count.where(
+            sa.text(f"\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
+                sa.bindparam(
+                    "query_param",
+                    value=query,
+                )
+            )
+        )
+
     statement = statement.limit(multi.limit).offset(multi.offset)
     res_raw = await db.execute(statement)
     res = res_raw.mappings().all()
@@ -106,8 +142,8 @@ async def get_applications(
 
 @router.get(
     "/anomalies",
-    summary="Get multiple applications",
 )
+@cache(expire=300)
 async def anomalies(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
@@ -115,7 +151,7 @@ async def anomalies(
 ) -> typing.Any:
     query = await db.execute(
         sqlalchemy.text(
-            "select id, geo_coordinates from application where geo_coordinates is not NULL and is_anomaly = true"
+            'select id, geo_coordinates, "Наименование дефекта" from application where geo_coordinates is not NULL and is_anomaly = true'
         )
     )
     applications = query.mappings().all()
@@ -130,37 +166,38 @@ async def anomalies(
     "/meta",
     summary="Get metadata",
 )
+@cache(expire=300)
 async def meta(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
     log: typing.Any = fastapi.Depends(deps.logger),
 ) -> typing.Any:
-    defect_category_name_query = await db.execute(
-        sqlalchemy.text('select distinct "Наименование категории дефекта" from application')
-    )
-    defect_category_name = defect_category_name_query.scalars().all()
-
-    type_of_work_performed_query = await db.execute(
-        sqlalchemy.text('select distinct "Вид выполненных работ" from application')
-    )
-    type_of_work_performed = type_of_work_performed_query.scalars().all()
-
-    district_code_query = await db.execute(
-        sqlalchemy.text('select distinct "Код района" from application')
-    )
-    district_code = district_code_query.scalars().all()
-
-    return {
-        "defect_category_name": defect_category_name,
-        "type_of_work_performed": type_of_work_performed,
-        "district_code": district_code,
+    filters = {
+        "Наименование категории дефекта": "defect_category_name",
+        "Вид выполненных работ": "type_of_work_performed",
+        "Код района": "district_code",
+        "Наименование района": "district_name",
+        "Наименование управляющей компани": "name_of_the_management_company",
+        "Наименование обслуживавшей орган": "name_of_the_service_organization",
+        "Наименование источника поступлен": "source_name",
+        "Оценка качества выполнения работ": "quality_evaluation",
     }
+    result = {}
+    for column, codename in filters.items():
+        query_result_raw = await db.execute(
+            sqlalchemy.text(f'select distinct "{column}" from application')
+        )
+        query_result = query_result_raw.scalars().all()
+        result[codename] = query_result
+
+    return result
 
 
 @router.get(
     "/{application_id}",
     summary="Get one application",
 )
+@cache(expire=300)
 async def one_application(
     *,
     application_id: int = fastapi.Query(...),
