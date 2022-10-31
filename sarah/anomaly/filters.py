@@ -54,18 +54,16 @@ async def get_close_wo_completion_first(
     db: aorm.AsyncSession,
     log: tp.Any,
 ) -> tp.List[dict]:
-
-    query_applications = await db_queries.get_close_wo_completion_first(db=db, log=log)
-    query_applications = sorted(query_applications, key=lambda item: item.get("Дата закрытия"))
-
     # group applications to dict with applicant_id_name_of_defect
     applications: tp.Dict[str, tp.List[dict]] = {}
-    for key, group in it.groupby(query_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
-        for item in group:
-            if key in applications:
-                applications[key].append(item)
-            else:
-                applications[key] = [item]
+    async for yield_applications in db_queries.get_close_wo_completion_first(db=db, log=log):
+        sorted_applications = sorted(yield_applications, key=lambda item: item.get("Дата закрытия"))
+        for key, group in it.groupby(sorted_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
+            for item in group:
+                if key in applications:
+                    applications[key].append(item)
+                else:
+                    applications[key] = [item]
     
     anomaly_criteria = await db_queries.get_anomaly_criteria(db=db, log=log)
 
@@ -79,22 +77,21 @@ async def get_close_wo_completion_second(
     db: aorm.AsyncSession,
     log: tp.Any,
 ) -> tp.List[dict]:
-    query_applications = await db_queries.get_close_wo_completion_second(db=db, log=log)
-    query_applications = sorted(query_applications, key=lambda item: item.get("Дата закрытия"))
-
     # group applications to dict with applicant_id_name_of_defect
     applications: tp.Dict[str, tp.List[dict]] = {}
-    for key, group in it.groupby(query_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
-        for item in group:
-            if key in applications:
-                applications[key].append(item)
-            else:
-                applications[key] = [item]
+    async for yield_applications in db_queries.get_close_wo_completion_second(db=db, log=log):
+        sorted_applications = sorted(yield_applications, key=lambda item: item.get("Дата закрытия"))
+        for key, group in it.groupby(sorted_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
+            for item in group:
+                if key in applications:
+                    applications[key].append(item)
+                else:
+                    applications[key] = [item]
     
     anomaly_criteria = await db_queries.get_anomaly_criteria(db=db, log=log)
 
     anomaly_applications = await _get_anomaly_applications(applications, anomaly_criteria, log)
-    
+
     return anomaly_applications
 
 
@@ -102,22 +99,21 @@ async def get_close_wo_completion_third(
     *,
     db: aorm.AsyncSession,
     log: tp.Any,
-) -> tp.List[dict]:
-    query_applications = await db_queries.get_close_wo_completion_third(db=db, log=log)
-    query_applications = sorted(query_applications, key=lambda item: item.get("Дата закрытия"))
-    
+) -> tp.List[dict]:    
     short_defects_ids = await db_queries.get_short_defects_ids(db=db, log=log)
 
     # group applications to dict with applicant_id_name_of_defect
     applications: tp.Dict[str, tp.List[dict]] = {}
-    for key, group in it.groupby(query_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
-        for item in group:
-            if item["Идентификатор дефекта"] not in short_defects_ids:
-                continue
-            if key in applications:
-                applications[key].append(item)
-            else:
-                applications[key] = [item]
+    async for yield_applications in db_queries.get_close_wo_completion_third(db=db, log=log):
+        sorted_applications = sorted(yield_applications, key=lambda item: item.get("Дата закрытия"))
+        for key, group in it.groupby(sorted_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
+            for item in group:
+                if item["Идентификатор дефекта"] not in short_defects_ids:
+                    continue
+                if key in applications:
+                    applications[key].append(item)
+                else:
+                    applications[key] = [item]
     
     anomaly_criteria = await db_queries.get_anomaly_criteria(db=db, log=log)
 
@@ -130,22 +126,21 @@ async def get_close_wo_completion_fourth(
     *,
     db: aorm.AsyncSession,
     log: tp.Any,
-) -> tp.List[dict]:
-    query_applications = await db_queries.get_close_wo_completion_fourth(db=db, log=log)
-    query_applications = sorted(query_applications, key=lambda item: item.get("Дата закрытия"))
-    
+) -> tp.List[dict]:    
     short_defects_ids = await db_queries.get_short_defects_ids(db=db, log=log)
 
     # group applications to dict with applicant_id_name_of_defect
     applications: tp.Dict[str, tp.List[dict]] = {}
-    for key, group in it.groupby(query_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
-        for item in group:
-            if item["Идентификатор дефекта"] in short_defects_ids:
-                continue
-            if key in applications:
-                applications[key].append(item)
-            else:
-                applications[key] = [item]
+    async for yield_applications in db_queries.get_close_wo_completion_fourth(db=db, log=log):
+        sorted_applications = sorted(yield_applications, key=lambda item: item.get("Дата закрытия"))
+        for key, group in it.groupby(sorted_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
+            for item in group:
+                if item["Идентификатор дефекта"] in short_defects_ids:
+                    continue
+                if key in applications:
+                    applications[key].append(item)
+                else:
+                    applications[key] = [item]
     
     anomaly_criteria = await db_queries.get_anomaly_criteria(db=db, log=log)
 
@@ -158,22 +153,21 @@ async def get_close_wo_completion_fifth(
     *,
     db: aorm.AsyncSession,
     log: tp.Any,
-) -> tp.List[dict]:
-    query_applications = await db_queries.get_close_wo_completion_fifth(db=db, log=log)
-    query_applications = sorted(query_applications, key=lambda item: item.get("Дата закрытия"))
-    
+) -> tp.List[dict]:    
     restricted_repeated_applications_ids = await db_queries.get_restricted_repeated_applications(db=db, log=log)
 
     # group applications to dict with applicant_id_name_of_defect
     applications: tp.Dict[str, tp.List[dict]] = {}
-    for key, group in it.groupby(query_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
-        for item in group:
-            if item["Идентификатор дефекта"] not in restricted_repeated_applications_ids:
-                continue
-            if key in applications:
-                applications[key].append(item)
-            else:
-                applications[key] = [item]
+    async for yield_applications in db_queries.get_close_wo_completion_fifth(db=db, log=log):
+        sorted_applications = sorted(yield_applications, key=lambda item: item.get("Дата закрытия"))
+        for key, group in it.groupby(sorted_applications, key=lambda item: str(item["applicant_id"]) + "_" + str(item["Наименование дефекта"])):
+            for item in group:
+                if item["Идентификатор дефекта"] not in restricted_repeated_applications_ids:
+                    continue
+                if key in applications:
+                    applications[key].append(item)
+                else:
+                    applications[key] = [item]
     
     anomaly_criteria = await db_queries.get_anomaly_criteria(db=db, log=log)
 

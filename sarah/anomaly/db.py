@@ -76,7 +76,7 @@ async def get_close_wo_completion_first(
     log: tp.Any = fastapi.Depends(deps.logger),
     batch_size: int = 10000
 ) -> tp.List[dict]:
-    query = await db.execute(
+    query = await db.stream(
         sqlalchemy.text(
             """
             SELECT
@@ -90,9 +90,11 @@ async def get_close_wo_completion_first(
                 AND "Вид выполненных работ" != 'Аварийное/плановое отключение' 
             LIMIT :batch_size;
             """
-        ).bindparams(batch_size=batch_size)
+        ).bindparams(batch_size=batch_size),
+        execution_options={"yield_per": 1000}
     )
-    return query.mappings().all()
+    async for partition in query.mappings().partitions():
+        yield([row for row in partition])
 
 
 async def get_close_wo_completion_second(
@@ -100,7 +102,7 @@ async def get_close_wo_completion_second(
     log: tp.Any = fastapi.Depends(deps.logger),
     batch_size: int = 10000
 ) -> tp.List[dict]:
-    query = await db.execute(
+    query = await db.stream(
         sqlalchemy.text(
             """
             SELECT
@@ -115,9 +117,11 @@ async def get_close_wo_completion_second(
                 AND ("Кол-во возвратов на доработку" IS NULL OR "Кол-во возвратов на доработку" = '0') 
             LIMIT :batch_size;
             """
-        ).bindparams(batch_size=batch_size)
+        ).bindparams(batch_size=batch_size),
+        execution_options={"yield_per": 1000}
     )
-    return query.mappings().all()
+    async for partition in query.mappings().partitions():
+        yield([row for row in partition])
 
 
 async def get_close_wo_completion_third(
@@ -125,7 +129,7 @@ async def get_close_wo_completion_third(
     log: tp.Any = fastapi.Depends(deps.logger),
     batch_size: int = 10000
 ) -> tp.List[dict]:
-    query = await db.execute(
+    query = await db.stream(
         sqlalchemy.text(
             """
             SELECT
@@ -138,9 +142,11 @@ async def get_close_wo_completion_third(
                 AND COALESCE(EXTRACT(epoch FROM application.application_closure_timestamp - application.application_creation_timestamp), 0) / 60 < 10
             LIMIT :batch_size;
             """
-        ).bindparams(batch_size=batch_size)
+        ).bindparams(batch_size=batch_size),
+        execution_options={"yield_per": 1000}
     )
-    return query.mappings().all()
+    async for partition in query.mappings().partitions():
+        yield([row for row in partition])
 
 
 async def get_close_wo_completion_fourth(
@@ -148,7 +154,7 @@ async def get_close_wo_completion_fourth(
     log: tp.Any = fastapi.Depends(deps.logger),
     batch_size: int = 10000
 ) -> tp.List[dict]:
-    query = await db.execute(
+    query = await db.stream(
         sqlalchemy.text(
             """
             SELECT
@@ -161,9 +167,11 @@ async def get_close_wo_completion_fourth(
                 AND COALESCE(EXTRACT(epoch FROM application.application_closure_timestamp - application.application_creation_timestamp), 0) / 60 < 10
             LIMIT :batch_size;
             """
-        ).bindparams(batch_size=batch_size)
+        ).bindparams(batch_size=batch_size),
+        execution_options={"yield_per": 1000}
     )
-    return query.mappings().all()
+    async for partition in query.mappings().partitions():
+        yield([row for row in partition])
 
 
 async def get_close_wo_completion_fifth(
@@ -171,7 +179,7 @@ async def get_close_wo_completion_fifth(
     log: tp.Any = fastapi.Depends(deps.logger),
     batch_size: int = 10000
 ) -> tp.List[dict]:
-    query = await db.execute(
+    query = await db.stream(
         sqlalchemy.text(
             """
             SELECT
@@ -183,6 +191,25 @@ async def get_close_wo_completion_fifth(
                 AND "Кол-во возвратов на доработку" IS NOT NULL AND "Кол-во возвратов на доработку" != '0'
             LIMIT :batch_size;
             """
-        ).bindparams(batch_size=batch_size)
+        ).bindparams(batch_size=batch_size),
+        execution_options={"yield_per": 1000}
     )
-    return query.mappings().all()
+    async for partition in query.mappings().partitions():
+        yield([row for row in partition])
+
+
+async def update_applications_is_anomaly(
+    ids: list,
+    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
+    log: tp.Any = fastapi.Depends(deps.logger)
+):
+    query = await db.execute(
+        sqlalchemy.text(
+            """
+            UPDATE application
+            SET is_anomaly = True
+            WHERE id IN (:ids);
+            """
+        ).bindparams(ids=ids)
+    )
+    return query

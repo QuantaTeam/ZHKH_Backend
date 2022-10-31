@@ -19,4 +19,5 @@ async def get_anomalies(
     multi: deps.Multi = fastapi.Depends(),
 ) -> tp.Any:
     applications = await filters.get_close_wo_completion_first(db=db, log=log)
+    log.msg(len(applications))
     return applications
