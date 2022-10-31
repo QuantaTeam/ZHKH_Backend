@@ -4,7 +4,6 @@ import typing as tp
 import fastapi
 import sqlalchemy
 from sqlalchemy.ext import asyncio as aorm
-from sqlalchemy import orm
 
 from sarah import deps
 from sarah.anomaly import db as db_queries
