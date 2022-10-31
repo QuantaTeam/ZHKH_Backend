@@ -10,6 +10,7 @@ up-sarah:
 up-gerda:
     go run ./cmd/gerda
 
+
 up-db *extra_flags:
     docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build {{extra_flags}}
 
