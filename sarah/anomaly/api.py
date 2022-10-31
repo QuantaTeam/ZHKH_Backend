@@ -2,6 +2,7 @@ import typing as tp
 
 import fastapi
 from sqlalchemy.ext import asyncio as aorm
+from sqlalchemy import orm
 
 from sarah import deps
 from sarah.anomaly import filters
@@ -19,4 +20,5 @@ async def get_anomalies(
     multi: deps.Multi = fastapi.Depends(),
 ) -> tp.Any:
     applications = await filters.get_close_wo_completion_first(db=db, log=log)
+    log.msg(len(applications))
     return applications
