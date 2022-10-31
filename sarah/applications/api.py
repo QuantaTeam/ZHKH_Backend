@@ -55,7 +55,7 @@ def apply_time_filters(
 @router.get(
     "/",
 )
-@cache(expire=60)
+@cache(expire=300)
 async def get_applications(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
@@ -143,7 +143,7 @@ async def get_applications(
 @router.get(
     "/anomalies",
 )
-@cache(expire=60)
+@cache(expire=300)
 async def anomalies(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
@@ -166,7 +166,7 @@ async def anomalies(
     "/meta",
     summary="Get metadata",
 )
-@cache(expire=60)
+@cache(expire=300)
 async def meta(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
@@ -197,7 +197,7 @@ async def meta(
     "/{application_id}",
     summary="Get one application",
 )
-@cache(expire=60)
+@cache(expire=300)
 async def one_application(
     *,
     application_id: int = fastapi.Query(...),
