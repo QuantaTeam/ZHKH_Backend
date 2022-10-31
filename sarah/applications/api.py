@@ -79,6 +79,7 @@ async def get_applications(
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
     closure_timestamp_start: datetime | None = fastapi.Query(default=None),
     closure_timestamp_end: datetime | None = fastapi.Query(default=None),
+    query: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
         "Наименование категории дефекта": defect_category_name,
@@ -107,6 +108,24 @@ async def get_applications(
         statement = statement.where(sa.Column("is_anomaly").__eq__(is_anomaly))
         statement_count = statement_count.where(
             sa.Column("is_anomaly").__eq__(is_anomaly)
+        )
+
+    if query is not None and len(query) > 0:
+        statement = statement.where(
+            sa.text(f"\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
+                sa.bindparam(
+                    "query_param",
+                    value=query,
+                )
+            )
+        )
+        statement_count = statement_count.where(
+            sa.text(f"\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
+                sa.bindparam(
+                    "query_param",
+                    value=query,
+                )
+            )
         )
 
     statement = statement.limit(multi.limit).offset(multi.offset)
@@ -190,26 +209,3 @@ async def one_application(
             404, f"Application with {application_id} id not found."
         )
     return application[0]
-
-
-# @router.get(
-#     "/search",
-#     summary="Search",
-# )
-# async def search(
-#     *,
-#     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-#     log: typing.Any = fastapi.Depends(deps.logger),
-#     query: str = fastapi.Query(...),
-# ) -> typing.Any:
-#     query = await db.execute(
-#         sqlalchemy.text(
-#             "select * from application where application.id = :application_id"
-#         ).bindparams(application_id=application_id)
-#     )
-#     application = query.mappings().all()
-#     if application is None or len(application) == 0:
-#         raise fastapi.HTTPException(
-#             404, f"Application with {application_id} id not found."
-#         )
-#     return application[0]
