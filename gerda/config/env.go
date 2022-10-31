@@ -14,6 +14,7 @@ type Config struct {
 	SimultaneousGeocodeUpdates int    `env:"SIMULTANEOUS_GEOCODE_UPDATES,required"`
 	GeocodeIntervalMinutes     int    `env:"GEOCODE_INTERVAL_MINUTES,required"`
 	GeocodeTaskEnabled         bool   `env:"GEOCODE_TASK_ENABLED,required"`
+	MOS_RU_OPEN_DATA_API_KEY   string `env:"MOS_RU_OPEN_DATA_API_KEY,required"`
 }
 
 func Read() (*Config, error) {

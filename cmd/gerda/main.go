@@ -5,12 +5,9 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	_ "go.uber.org/automaxprocs"
 	"go.uber.org/zap"
-
-	"github.com/jmoiron/sqlx"
 
 	"github.com/QuantaTeam/ZHKH_Backend/gerda/celery"
 	"github.com/QuantaTeam/ZHKH_Backend/gerda/config"
@@ -50,16 +47,9 @@ func main() {
 		log.Panicf("failed to read config: %v\n", err)
 	}
 
-	var rdb *sqlx.DB
-	for i := 0; i < 10; i++ {
-		rdb, err = postgres.OpenDB()
-		if err != nil {
-			if i == 9 {
-				log.Panicf("Could not open pg connection 10 times.")
-			}
-			time.Sleep(1 * time.Second)
-			continue
-		}
+	rdb, err := postgres.OpenDB()
+	if err != nil {
+		log.Panicf("could not open pg connection")
 	}
 
 	celery.Serve(logger, rdb, conf)

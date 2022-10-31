@@ -8,6 +8,9 @@ up-sarah:
     pdm run uvicorn sarah.main:app --reload
 
 up-gerda:
+    #!/usr/bin/env bash
+    export POSTGRES_SERVER=localhost
+    export REDIS_SERVER=localhost
     go run ./cmd/gerda
 
 
