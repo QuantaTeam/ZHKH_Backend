@@ -40,3 +40,6 @@ class Multi:
     ):
         self.offset = skip
         self.limit = limit
+
+    def __str__(self):
+        return f"offset: {self.offset}, limit: {self.limit}"

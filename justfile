@@ -3,14 +3,15 @@ set dotenv-load
 up-sarah:
     #!/usr/bin/env bash
     export POSTGRES_SERVER=localhost
+    export REDIS_SERVER=localhost
     export DEBUG=true
     pdm run uvicorn sarah.main:app --reload
 
 up-gerda:
     go run ./cmd/gerda
 
-up-db:
-    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build -d
+up-db *extra_flags:
+    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build {{extra_flags}}
 
 down-db *extra_flags:
     docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db down {{extra_flags}}
