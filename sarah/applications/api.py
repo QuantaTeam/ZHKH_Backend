@@ -65,6 +65,16 @@ async def get_applications(
     type_of_work_performed: typing.List[str] | None = fastapi.Query(default=None),
     # Код района
     district_code: typing.List[str] | None = fastapi.Query(default=None),
+    # Наименование района
+    district_name: list[str] | None = fastapi.Query(default=None),
+    # Наименование управляющей компани
+    name_of_the_management_company: list[str] | None = fastapi.Query(default=None),
+    # Наименование обслуживавшей орган
+    name_of_the_service_organization: list[str] | None = fastapi.Query(default=None),
+    # Наименование источника поступлен
+    source_name: list[str] | None = fastapi.Query(default=None),
+    # Оценка качества выполнения работ
+    quality_evaluation: list[str] | None = fastapi.Query(default=None),
     creation_timestamp_start: datetime | None = fastapi.Query(default=None),
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
     closure_timestamp_start: datetime | None = fastapi.Query(default=None),
@@ -74,6 +84,11 @@ async def get_applications(
         "Наименование категории дефекта": defect_category_name,
         "Вид выполненных работ": type_of_work_performed,
         "Код района": district_code,
+        "Наименование района": district_name,
+        "Наименование управляющей компани": name_of_the_management_company,
+        "Наименование обслуживавшей орган": name_of_the_service_organization,
+        "Наименование источника поступлен": source_name,
+        "Оценка качества выполнения работ": quality_evaluation,
     }
     time_filters = [
         ("application_creation_timestamp", creation_timestamp_start, ">"),
@@ -133,28 +148,25 @@ async def meta(
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
     log: typing.Any = fastapi.Depends(deps.logger),
 ) -> typing.Any:
-    defect_category_name_query = await db.execute(
-        sqlalchemy.text(
-            'select distinct "Наименование категории дефекта" from application'
-        )
-    )
-    defect_category_name = defect_category_name_query.scalars().all()
-
-    type_of_work_performed_query = await db.execute(
-        sqlalchemy.text('select distinct "Вид выполненных работ" from application')
-    )
-    type_of_work_performed = type_of_work_performed_query.scalars().all()
-
-    district_code_query = await db.execute(
-        sqlalchemy.text('select distinct "Код района" from application')
-    )
-    district_code = district_code_query.scalars().all()
-
-    return {
-        "defect_category_name": defect_category_name,
-        "type_of_work_performed": type_of_work_performed,
-        "district_code": district_code,
+    filters = {
+        "Наименование категории дефекта": "defect_category_name",
+        "Вид выполненных работ": "type_of_work_performed",
+        "Код района": "district_code",
+        "Наименование района": "district_name",
+        "Наименование управляющей компани": "name_of_the_management_company",
+        "Наименование обслуживавшей орган": "name_of_the_service_organization",
+        "Наименование источника поступлен": "source_name",
+        "Оценка качества выполнения работ": "quality_evaluation",
     }
+    result = {}
+    for column, codename in filters.items():
+        query_result_raw = await db.execute(
+            sqlalchemy.text(f'select distinct "{column}" from application')
+        )
+        query_result = query_result_raw.scalars().all()
+        result[codename] = query_result
+
+    return result
 
 
 @router.get(
