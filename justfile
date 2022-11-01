@@ -1,5 +1,8 @@
 set dotenv-load
 
+up-chloe:
+    docker compose -f docker-compose.yml -f docker-compose.local.yml up chloe --build
+
 up-sarah:
     #!/usr/bin/env bash
     export POSTGRES_SERVER=localhost
@@ -12,7 +15,7 @@ up-gerda:
 
 
 up-db *extra_flags:
-    docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build {{extra_flags}}
+    docker compose -f docker-compose.yml -f docker-compose.local.yml --profile db up --build {{extra_flags}}
 
 down-db *extra_flags:
     docker-compose -f docker-compose.yml -f docker-compose.local.yml --profile db down {{extra_flags}}

@@ -169,6 +169,20 @@ services:
       - 6379:6379
     networks:
       - traefik-public
+  
+  chloe:
+    # entrypoint: ["bash", "/entrypoint.local.sh"]
+    image: "${DOCKER_IMAGE_PREFIX?Variable not set}barklan/chloe:rolling"
+    build:
+      context: .
+      dockerfile: ./dockerfiles/chloe.dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        DOCKER_IMAGE_PREFIX: ${DOCKER_IMAGE_PREFIX?Variable not set}
+    networks:
+      - traefik-public
+    env_file:
+      - ./.env
 
 volumes:
   traefik-public-certificates: null

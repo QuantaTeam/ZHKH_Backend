@@ -52,6 +52,19 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_USER?Variable not
         set}:${POSTGRES_PASSWORD?Variable not
         set}@sarah_db:5432/${POSTGRES_DB?Variable not set}?sslmode=disable
+  
+  chloe:
+    restart: on-failure
+    profiles: ["main"]
+    container_name: chloe_backend
+    volumes:
+      - ./.cache:/app/data
+      - ./.cache/media:/app/media
+      - "${PROJECT_PATH-.}/environment:/app/config"
+    networks:
+      - traefik-public
+    environment:
+      - CONFIG_ENV=devdocker
 
 volumes:
   sarah-postgres:
