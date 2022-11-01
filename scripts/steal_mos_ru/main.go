@@ -116,12 +116,12 @@ func readRespBody(resp *http.Response) []byte {
 }
 
 func main() {
-	db, err := OpenDB()
-	if err != nil {
-		log.Panicf("could not open pg connection\n")
-	}
+	// db, err := OpenDB()
+	// if err != nil {
+	// 	log.Panicf("could not open pg connection\n")
+	// }
 	client := &http.Client{
-		Timeout: 120 * time.Second,
+		Timeout: 200 * time.Second,
 	}
 	f, err := os.OpenFile("mosru.csv", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
 	if err != nil {
@@ -129,7 +129,7 @@ func main() {
 	}
 
 	bar := progressbar.Default(475401)
-	step := 200
+	step := 1000
 	for skip := 0; skip < 475401; skip += step {
 		bar.Add(step)
 		req, err := http.NewRequest(http.MethodGet, "https://apidata.mos.ru/v1/datasets/60562/rows", nil)
@@ -207,5 +207,6 @@ func main() {
 				panic(err)
 			}
 		}
+        log.Printf("skip %d done\n", skip)
 	}
 }
