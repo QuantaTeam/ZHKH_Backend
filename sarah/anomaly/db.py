@@ -80,7 +80,10 @@ async def get_close_wo_completion_first(
         sqlalchemy.text(
             """
             SELECT
-                *,
+                id,
+                "Дата закрытия",
+                "Наименование дефекта",
+                applicant_id,
                 application.application_creation_timestamp as application_creation_timestamp
             FROM application
             WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
@@ -144,7 +147,11 @@ async def get_close_wo_completion_third(
         sqlalchemy.text(
             """
             SELECT
-                *,
+                id,
+                "Дата закрытия",
+                "Наименование дефекта",
+                "Идентификатор дефекта",
+                applicant_id,
                 application.application_creation_timestamp as application_creation_timestamp
             FROM application
             WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
@@ -173,7 +180,11 @@ async def get_close_wo_completion_fourth(
         sqlalchemy.text(
             """
             SELECT
-                *,
+                id,
+                "Дата закрытия",
+                "Наименование дефекта",
+                "Идентификатор дефекта",
+                applicant_id,
                 application.application_creation_timestamp as application_creation_timestamp
             FROM application
             WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
@@ -202,7 +213,11 @@ async def get_close_wo_completion_fifth(
         sqlalchemy.text(
             """
             SELECT
-                *,
+                id,
+                "Дата закрытия",
+                "Наименование дефекта",
+                "Идентификатор дефекта",
+                applicant_id,
                 application.application_creation_timestamp as application_creation_timestamp
             FROM application
             WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
