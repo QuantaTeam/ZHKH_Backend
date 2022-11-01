@@ -3,6 +3,7 @@ package celery
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -26,9 +27,10 @@ type GeoData struct {
 }
 
 func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.Duration) {
-	ticker := time.NewTicker(period)
+	// ticker := time.NewTicker(period)
 	applicationsWithoutGeo := make([]ApplicationGeo, 0)
-	for range ticker.C {
+	// for range ticker.C {
+	for {
 		if !conf.GeocodeTaskEnabled {
 			logger.Warn("geocode task disabled, skipping")
 			continue
@@ -51,36 +53,44 @@ func geocode(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config, period time.
 			logger.Error("failed to create db transaction", zap.Error(err))
 			continue
 		}
-		for _, application := range applicationsWithoutGeo {
-			var geoData GeoData
-			if err = rdb.Get(
-				&geoData,
-				"select x_geo, y_geo from moscow_geo where short_address = $1",
-				application.Adress,
-			); err != nil {
-				logger.Error("address lookup error", zap.Error(err))
-				update := "update application set geo_not_found = true where application.id = $1"
-				if _, err = tx.Exec(update, application.ID); err != nil {
-					logger.Error("failed set geo_not_found flag", zap.Error(err))
+
+		var wg sync.WaitGroup
+		for _, applicationIter := range applicationsWithoutGeo {
+			application := applicationIter
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				var geoData GeoData
+				if err = rdb.Get(
+					&geoData,
+					"select x_geo, y_geo from moscow_geo where short_address = $1",
+					application.Adress,
+				); err != nil {
+					logger.Error("address lookup error", zap.Error(err))
+					update := "update application set geo_not_found = true where application.id = $1"
+					if _, err = tx.Exec(update, application.ID); err != nil {
+						logger.Error("failed set geo_not_found flag", zap.Error(err))
+						if e := tx.Rollback(); e != nil {
+							logger.Error("failed to rollback transaction", zap.Error(err))
+						}
+					}
+					return
+				}
+				coordinatesFloats := make([]float64, 2)
+				coordinatesFloats[0] = geoData.XGeo
+				coordinatesFloats[1] = geoData.YGeo
+
+				update := "update application set geo_coordinates = $1 where application.id = $2"
+				if _, err = tx.Exec(update, pq.Array(coordinatesFloats), application.ID); err != nil {
+					logger.Error("failed to update geo coordinates", zap.Error(err))
 					if e := tx.Rollback(); e != nil {
 						logger.Error("failed to rollback transaction", zap.Error(err))
 					}
+					return
 				}
-				continue
-			}
-			coordinatesFloats := make([]float64, 2)
-			coordinatesFloats[0] = geoData.XGeo
-			coordinatesFloats[1] = geoData.YGeo
-
-			update := "update application set geo_coordinates = $1 where application.id = $2"
-			if _, err = tx.Exec(update, pq.Array(coordinatesFloats), application.ID); err != nil {
-				logger.Error("failed to update geo coordinates", zap.Error(err))
-				if e := tx.Rollback(); e != nil {
-					logger.Error("failed to rollback transaction", zap.Error(err))
-				}
-				continue
-			}
+			}()
 		}
+		wg.Wait()
 		if err := tx.Commit(); err != nil {
 			logger.Error("failed to commit tx", zap.Error(err))
 			continue
