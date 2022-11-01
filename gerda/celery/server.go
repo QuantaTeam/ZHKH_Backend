@@ -21,7 +21,7 @@ func Serve(logger *zap.Logger, rdb *sqlx.DB, conf *config.Config) {
 			os.Exit(1)
 			wg.Done()
 		}()
-		period := time.Duration(conf.GeocodeIntervalMinutes) * time.Minute
+		period := time.Duration(conf.GeocodeIntervalSeconds) * time.Second
 		geocode(logger, rdb, conf, period)
 	}()
 	wg.Wait()

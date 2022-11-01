@@ -10,11 +10,11 @@ import (
 
 func main() {
 	timeStart := time.Now()
-	readFile, err := os.Open("shit2.csv")
+	readFile, err := os.Open("db/data/mosru_fix.csv")
 	if err != nil {
 		log.Println(err)
 	}
-	writeFile, err := os.Create("sample_500_000.csv")
+	writeFile, err := os.Create("mosru_fix.csv")
 	if err != nil {
 		log.Println(err)
 	}
