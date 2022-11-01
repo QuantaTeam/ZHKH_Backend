@@ -80,8 +80,8 @@ async def get_applications(
     quality_evaluation: list[str] | None = fastapi.Query(default=None),
     creation_timestamp_start: datetime | None = fastapi.Query(default=None),
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
-    closure_timestamp_start: datetime | None = fastapi.Query(default=None),
-    closure_timestamp_end: datetime | None = fastapi.Query(default=None),
+    # closure_timestamp_start: datetime | None = fastapi.Query(default=None),
+    # closure_timestamp_end: datetime | None = fastapi.Query(default=None),
     query: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
@@ -97,8 +97,8 @@ async def get_applications(
     time_filters = [
         ("application_creation_timestamp", creation_timestamp_start, ">"),
         ("application_creation_timestamp", creation_timestamp_end, "<"),
-        ("application_closure_timestamp", closure_timestamp_start, ">"),
-        ("application_closure_timestamp", closure_timestamp_end, "<"),
+        # ("application_closure_timestamp", closure_timestamp_start, ">"),
+        # ("application_closure_timestamp", closure_timestamp_end, "<"),
     ]
     statement = sa.select(sa.text("* from application"))
     statement_count = sa.select(sa.text("count(*) from application"))
