@@ -119,8 +119,8 @@ async def get_applications(
         "Оценка качества выполнения работ": quality_evaluation,
     }
     time_filters = [
-        ("application_creation_timestamp", creation_timestamp_start, ">"),
-        ("application_creation_timestamp", creation_timestamp_end, "<"),
+        ("timestamp_start", creation_timestamp_start, ">"),
+        ("timestamp_start", creation_timestamp_end, "<"),
         # ("application_closure_timestamp", closure_timestamp_start, ">"),
         # ("application_closure_timestamp", closure_timestamp_end, "<"),
     ]
