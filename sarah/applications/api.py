@@ -155,10 +155,14 @@ async def get_applications(
             )
         )
 
-    statement = statement.limit(multi.limit).offset(multi.offset)
-    res_raw = await db.execute(statement)
+    statement = (
+        statement.order_by(sa.Column("id")).limit(multi.limit).offset(multi.offset)
+    )
+    res_raw_cor = db.execute(statement)
+    res_count_raw_cor = db.execute(statement_count)
+    res_raw = await res_raw_cor
+    res_count_raw = await res_count_raw_cor
     res = res_raw.mappings().all()
-    res_count_raw = await db.execute(statement_count)
     res_count = res_count_raw.scalar_one()
     count_pages = math.ceil(res_count / multi.limit)
 
