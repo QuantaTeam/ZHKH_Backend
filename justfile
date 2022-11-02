@@ -1,8 +1,5 @@
 set dotenv-load
 
-up-chloe:
-    docker compose -f docker-compose.yml -f docker-compose.local.yml up chloe --build
-
 up-sarah:
     #!/usr/bin/env bash
     export POSTGRES_SERVER=localhost
