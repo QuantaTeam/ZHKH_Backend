@@ -72,9 +72,9 @@ async def get_restricted_repeated_applications(
 
 
 async def get_close_wo_completion_first(
-    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-    log: tp.Any = fastapi.Depends(deps.logger),
-    batch_size: int = 100
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 10
 ) -> tp.List[dict]:
     query = await db.stream(
         sqlalchemy.text(
@@ -92,7 +92,7 @@ async def get_close_wo_completion_first(
                 AND "Результативность" != 'Выполнено'
                 AND "Вид выполненных работ" != 'Аварийное/плановое отключение' 
                 AND is_anomaly = false
-            LIMIT 1000;
+            LIMIT 100;
             """
         ),
         execution_options={"yield_per": batch_size, "stream_results": True}
@@ -105,9 +105,9 @@ async def get_close_wo_completion_first(
 
 
 async def get_close_wo_completion_second(
-    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-    log: tp.Any = fastapi.Depends(deps.logger),
-    batch_size: int = 100
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 10
 ) -> tp.List[dict]:
     query = await db.stream(
         sqlalchemy.text(
@@ -126,7 +126,7 @@ async def get_close_wo_completion_second(
                 AND COALESCE(EXTRACT(epoch FROM application.application_closure_timestamp - application.application_creation_timestamp), 0) / 60 > 10
                 AND ("Кол-во возвратов на доработку" IS NULL OR "Кол-во возвратов на доработку" = '0') 
                 AND is_anomaly = false
-            LIMIT 1000
+            LIMIT 100
             """
         ),
         execution_options={"yield_per": batch_size, "stream_results": True}
@@ -139,9 +139,9 @@ async def get_close_wo_completion_second(
 
 
 async def get_close_wo_completion_third(
-    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-    log: tp.Any = fastapi.Depends(deps.logger),
-    batch_size: int = 100
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 10
 ) -> tp.List[dict]:
     query = await db.stream(
         sqlalchemy.text(
@@ -159,7 +159,7 @@ async def get_close_wo_completion_third(
                 AND ("Кол-во возвратов на доработку" IS NULL OR "Кол-во возвратов на доработку" = '0')
                 AND COALESCE(EXTRACT(epoch FROM application.application_closure_timestamp - application.application_creation_timestamp), 0) / 60 < 10
                 AND is_anomaly = false
-            LIMIT 1000;
+            LIMIT 100;
             """
         ),
         execution_options={"yield_per": batch_size, "stream_results": True}
@@ -172,9 +172,9 @@ async def get_close_wo_completion_third(
 
 
 async def get_close_wo_completion_fourth(
-    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-    log: tp.Any = fastapi.Depends(deps.logger),
-    batch_size: int = 100
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 10
 ) -> tp.List[dict]:
     query = await db.stream(
         sqlalchemy.text(
@@ -192,7 +192,7 @@ async def get_close_wo_completion_fourth(
                 AND "Кол-во возвратов на доработку" IS NOT NULL AND "Кол-во возвратов на доработку" != '0'
                 AND COALESCE(EXTRACT(epoch FROM application.application_closure_timestamp - application.application_creation_timestamp), 0) / 60 < 10
                 AND is_anomaly = false
-            LIMIT 1000;
+            LIMIT 100;
             """
         ),
         execution_options={"yield_per": batch_size, "stream_results": True}
@@ -205,9 +205,9 @@ async def get_close_wo_completion_fourth(
 
 
 async def get_close_wo_completion_fifth(
-    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-    log: tp.Any = fastapi.Depends(deps.logger),
-    batch_size: int = 100
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 10
 ) -> tp.List[dict]:
     query = await db.stream(
         sqlalchemy.text(
@@ -224,7 +224,7 @@ async def get_close_wo_completion_fifth(
                 AND "Результативность" = 'Выполнено'
                 AND "Кол-во возвратов на доработку" IS NOT NULL AND "Кол-во возвратов на доработку" != '0'
                 AND is_anomaly = false
-            LIMIT 1000;
+            LIMIT 100;
             """
         ),
         execution_options={"yield_per": batch_size, "stream_results": True}
@@ -237,9 +237,10 @@ async def get_close_wo_completion_fifth(
 
 
 async def update_applications_is_anomaly(
-    ids: list,
-    db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
-    log: tp.Any = fastapi.Depends(deps.logger)
+    *,
+    ids: tp.List[str],
+    db: aorm.AsyncSession,
+    log: tp.Any
 ):
     query = await db.execute(
         sqlalchemy.text(

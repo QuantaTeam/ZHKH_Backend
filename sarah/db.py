@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import pool
 from sqlalchemy import orm
 from sqlalchemy.ext import asyncio
 
@@ -14,7 +15,7 @@ SessionLocal = orm.sessionmaker(
 )
 
 async_engine = asyncio.create_async_engine(
-    config.settings.SQLALCHEMY_DATABASE_URI_ASYNC, pool_pre_ping=True
+    config.settings.SQLALCHEMY_DATABASE_URI_ASYNC, pool_pre_ping=True, poolclass=pool.NullPool, future=True
 )
 async_session = orm.sessionmaker(
     bind=async_engine,
