@@ -1,6 +1,6 @@
-begin;
+BEGIN;
 
-ALTER TABLE application ALTER COLUMN is_anomaly SET DEFAULT false;
+ALTER TABLE application ALTER COLUMN is_anomaly SET DEFAULT FALSE;
 ALTER TABLE application ALTER COLUMN is_anomaly SET NOT NULL;
 
-commit;
+COMMIT;

@@ -1,5 +1,5 @@
-begin;
+BEGIN;
 
-CREATE INDEX is_anomaly_idx on application(is_anomaly);
+CREATE INDEX is_anomaly_idx ON application(is_anomaly);
 
-commit;
+COMMIT;

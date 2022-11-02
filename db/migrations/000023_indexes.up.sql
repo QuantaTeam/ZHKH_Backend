@@ -1,5 +1,5 @@
-begin;
+BEGIN;
 
-CREATE INDEX timestamp_index on application(timestamp_start);
+CREATE INDEX timestamp_index ON application(timestamp_start);
 
-commit;
+COMMIT;
