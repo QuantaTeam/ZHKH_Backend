@@ -1,4 +1,4 @@
-import itertools as it 
+import itertools as it
 import time
 import typing as tp
 
@@ -16,7 +16,6 @@ def update_anomalies(
     log: tp.Any = fastapi.Depends(deps.logger)
 ):
     log.msg("hey")
-    while query_applications:
         applications = filter_func(db=db, log=log)
         update_applications_is_anomaly([application["id"] for application in applications])
     return
@@ -34,4 +33,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -57,7 +57,9 @@ def make_v2_list(res):
         i = 0
         one_res_v2 = {}
         for key, value in one_res.items():
-            one_res_v2[i] = value
+            if key == "geo_coordinates":
+                one_res_v2["geo_coordinates"] = value
+            one_res_v2[str(i)] = value
             i += 1
         res_v2.append(one_res_v2)
     return res_v2
@@ -67,7 +69,9 @@ def make_v2_one(res):
     i = 0
     one_res_v2 = {}
     for key, value in res.items():
-        one_res_v2[i] = value
+        if key == "geo_coordinates":
+            one_res_v2["geo_coordinates"] = value
+        one_res_v2[str(i)] = value
         i += 1
     return one_res_v2
 
