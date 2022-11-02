@@ -5,10 +5,9 @@ from datetime import datetime
 import fastapi
 import sqlalchemy
 import sqlalchemy as sa
+from fastapi_cache.decorator import cache
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext import asyncio as aorm
-
-from fastapi_cache.decorator import cache
 
 from sarah import deps
 
@@ -50,6 +49,27 @@ def apply_time_filters(
                 )
             )
     return statement
+
+
+def make_v2_list(res):
+    res_v2 = []
+    for one_res in res:
+        i = 0
+        one_res_v2 = {}
+        for key, value in one_res.items():
+            one_res_v2[i] = value
+            i += 1
+        res_v2.append(one_res_v2)
+    return res_v2
+
+
+def make_v2_one(res):
+    i = 0
+    one_res_v2 = {}
+    for key, value in res.items():
+        one_res_v2[i] = value
+        i += 1
+    return one_res_v2
 
 
 @router.get(
@@ -137,7 +157,8 @@ async def get_applications(
     res_count_raw = await db.execute(statement_count)
     res_count = res_count_raw.scalar_one()
     count_pages = math.ceil(res_count / multi.limit)
-    return {"res": res, "count_pages": count_pages}
+
+    return {"res": make_v2_list(res), "count_pages": count_pages}
 
 
 @router.get(
@@ -159,7 +180,7 @@ async def anomalies(
         raise fastapi.HTTPException(
             404, "Either no anomalies found or they haven't been geotagged yet."
         )
-    return applications
+    return make_v2_list(applications)
 
 
 @router.get(
@@ -214,4 +235,4 @@ async def one_application(
         raise fastapi.HTTPException(
             404, f"Application with {application_id} id not found."
         )
-    return application[0]
+    return make_v2_one(application[0])
