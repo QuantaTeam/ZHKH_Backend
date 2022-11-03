@@ -104,8 +104,6 @@ async def get_applications(
     quality_evaluation: list[str] | None = fastapi.Query(default=None),
     creation_timestamp_start: datetime | None = fastapi.Query(default=None),
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
-    # closure_timestamp_start: datetime | None = fastapi.Query(default=None),
-    # closure_timestamp_end: datetime | None = fastapi.Query(default=None),
     query: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
@@ -153,17 +151,21 @@ async def get_applications(
             )
         )
 
-    statement = (
+    statement_paged = (
         statement.order_by(sa.Column("id")).limit(multi.limit).offset(multi.offset)
     )
-    res_raw_cor = db.execute(statement)
-    res_count_raw_cor = db.execute(statement_count)
+    res_raw_cor = db.execute(statement_paged)
     res_raw = await res_raw_cor
-    res_count_raw = await res_count_raw_cor
     res = res_raw.mappings().all()
+    if len(res) < multi.limit:
+        return {"res": make_v2_list(res), "count_pages": 1}
+
+    estimate_statement = statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})
+    res_count_raw = await db.execute(
+        sqlalchemy.text(f"select row_estimator($${estimate_statement}$$);")
+    )
     res_count = res_count_raw.scalar_one()
     count_pages = math.ceil(res_count / multi.limit)
-
     return {"res": make_v2_list(res), "count_pages": count_pages}
 
 
