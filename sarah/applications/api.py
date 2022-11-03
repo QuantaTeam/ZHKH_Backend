@@ -121,8 +121,6 @@ async def get_applications(
     time_filters = [
         ("timestamp_start", creation_timestamp_start, ">"),
         ("timestamp_start", creation_timestamp_end, "<"),
-        # ("application_closure_timestamp", closure_timestamp_start, ">"),
-        # ("application_closure_timestamp", closure_timestamp_end, "<"),
     ]
     statement = sa.select(sa.text("* from application"))
     statement_count = sa.select(sa.text("count(*) from application"))
@@ -195,7 +193,7 @@ async def anomalies(
     "/meta",
     summary="Get metadata",
 )
-@cache(expire=300)
+@cache(expire=1200)
 async def meta(
     *,
     db: aorm.AsyncSession = fastapi.Depends(deps.get_async_db),
