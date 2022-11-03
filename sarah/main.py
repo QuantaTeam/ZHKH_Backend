@@ -1,7 +1,9 @@
 import typing
+from urllib.parse import urlencode
 
 import fastapi
 import structlog
+from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -73,6 +75,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def flatten_query_string_lists(request: Request, call_next):
+
+    flattened = []
+    for key, value in request.query_params.multi_items():
+        flattened.extend((key, entry) for entry in value.split(","))
+
+    request.scope["query_string"] = urlencode(flattened, doseq=True).encode("utf-8")
+
+    return await call_next(request)
 
 
 @app.on_event("startup")

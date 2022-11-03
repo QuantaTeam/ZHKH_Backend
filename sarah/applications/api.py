@@ -108,6 +108,7 @@ async def get_applications(
     # closure_timestamp_end: datetime | None = fastapi.Query(default=None),
     query: str | None = fastapi.Query(default=None),
 ) -> typing.Any:
+    log.msg("query debug", district_code=district_code)
     filters = {
         "Наименование категории дефекта": defect_category_name,
         "Вид выполненных работ": type_of_work_performed,
