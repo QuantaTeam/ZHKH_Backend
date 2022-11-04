@@ -21,7 +21,6 @@ def apply_where_filters(
     for column, parameter_value in filters.items():
         if parameter_value:
             parameter_count += 1
-            parameter_name = f"user_param_{str(parameter_count)}"
             statement = statement.where(sa.Column(column).in_(parameter_value))
     return statement
 
@@ -38,9 +37,7 @@ def apply_time_filters(
         parameter_name = f"user_time_param_{str(parameter_count)}"
         if parameter_value:
             statement = statement.where(
-                sa.text(
-                    f"{table_name}.{column} {operator} :{parameter_name}"
-                ).bindparams(
+                sa.text(f"{table_name}.{column} {operator} :{parameter_name}").bindparams(
                     sa.bindparam(
                         parameter_name,
                         value=parameter_value,
@@ -105,6 +102,7 @@ async def get_applications(
     creation_timestamp_start: datetime | None = fastapi.Query(default=None),
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
     query: str | None = fastapi.Query(default=None),
+    with_comment: bool | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
         "Наименование категории дефекта": defect_category_name,
@@ -121,35 +119,28 @@ async def get_applications(
         ("timestamp_start", creation_timestamp_end, "<"),
     ]
     statement = sa.select(sa.text("* from application"))
-    statement_count = sa.select(sa.text("count(*) from application"))
     statement = apply_where_filters(statement, filters)
-    statement_count = apply_where_filters(statement_count, filters)
     statement = apply_time_filters(statement, time_filters, "application")
-    statement_count = apply_time_filters(statement_count, time_filters, "application")
 
     if is_anomaly is not None:
         statement = statement.where(sa.Column("is_anomaly").__eq__(is_anomaly))
-        statement_count = statement_count.where(
-            sa.Column("is_anomaly").__eq__(is_anomaly)
-        )
 
     if query is not None and len(query) > 0:
         statement = statement.where(
-            sa.text(f"\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
+            sa.text("\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
                 sa.bindparam(
                     "query_param",
                     value=query,
                 )
             )
         )
-        statement_count = statement_count.where(
-            sa.text(f"\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
-                sa.bindparam(
-                    "query_param",
-                    value=query,
-                )
-            )
-        )
+
+    if with_comment is not None:
+        column = sqlalchemy.Column("Комментарии")
+        if with_comment:
+            statement = statement.where(column.isnot(None))
+        else:
+            statement = statement.where(column.is_(None))
 
     statement_paged = (
         statement.order_by(sa.Column("id")).limit(multi.limit).offset(multi.offset)
@@ -160,7 +151,9 @@ async def get_applications(
     if len(res) < multi.limit:
         return {"res": make_v2_list(res), "count_pages": 1}
 
-    estimate_statement = statement.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})
+    estimate_statement = statement.compile(
+        dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+    )
     res_count_raw = await db.execute(
         sqlalchemy.text(f"select row_estimator($${estimate_statement}$$);")
     )
