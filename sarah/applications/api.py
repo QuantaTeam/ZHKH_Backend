@@ -37,7 +37,9 @@ def apply_time_filters(
         parameter_name = f"user_time_param_{str(parameter_count)}"
         if parameter_value:
             statement = statement.where(
-                sa.text(f"{table_name}.{column} {operator} :{parameter_name}").bindparams(
+                sa.text(
+                    f"{table_name}.{column} {operator} :{parameter_name}"
+                ).bindparams(
                     sa.bindparam(
                         parameter_name,
                         value=parameter_value,
@@ -127,7 +129,7 @@ async def get_applications(
 
     if query is not None and len(query) > 0:
         statement = statement.where(
-            sa.text("\"Описание\" LIKE '%' || :query_param || '%'").bindparams(
+            sa.text("compound LIKE '%' || :query_param || '%'").bindparams(
                 sa.bindparam(
                     "query_param",
                     value=query,

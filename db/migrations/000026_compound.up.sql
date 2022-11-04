@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE application ADD COLUMN compound TEXT;
+
+COMMIT;
