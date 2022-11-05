@@ -207,6 +207,7 @@ async def meta(
         "Наименование обслуживавшей орган": "name_of_the_service_organization",
         "Наименование источника поступлен": "source_name",
         "Оценка качества выполнения работ": "quality_evaluation",
+        "Результативность": "result_desc",
     }
     result = {}
     for column, codename in filters.items():
