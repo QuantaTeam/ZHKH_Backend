@@ -105,6 +105,7 @@ async def get_applications(
     creation_timestamp_end: datetime | None = fastapi.Query(default=None),
     query: str | None = fastapi.Query(default=None),
     with_comment: bool | None = fastapi.Query(default=None),
+    result_desc: list[str] | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
         "Наименование категории дефекта": defect_category_name,
@@ -115,6 +116,7 @@ async def get_applications(
         "Наименование обслуживавшей орган": name_of_the_service_organization,
         "Наименование источника поступлен": source_name,
         "Оценка качества выполнения работ": quality_evaluation,
+        "Результативность": result_desc,
     }
     time_filters = [
         ("timestamp_start", creation_timestamp_start, ">"),
