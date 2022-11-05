@@ -106,6 +106,7 @@ async def get_applications(
     query: str | None = fastapi.Query(default=None),
     with_comment: bool | None = fastapi.Query(default=None),
     result_desc: list[str] | None = fastapi.Query(default=None),
+    urgency list[str] | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
         "Наименование категории дефекта": defect_category_name,
@@ -117,6 +118,7 @@ async def get_applications(
         "Наименование источника поступлен": source_name,
         "Оценка качества выполнения работ": quality_evaluation,
         "Результативность": result_desc,
+        "Наименование категории срочности:": urgency,
     }
     time_filters = [
         ("timestamp_start", creation_timestamp_start, ">"),
@@ -208,6 +210,7 @@ async def meta(
         "Наименование источника поступлен": "source_name",
         "Оценка качества выполнения работ": "quality_evaluation",
         "Результативность": "result_desc",
+        "Наименование категории срочности:": "urgency",
     }
     result = {}
     for column, codename in filters.items():
