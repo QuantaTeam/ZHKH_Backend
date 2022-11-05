@@ -24,7 +24,6 @@ async def get_anomalies(
     multi: deps.Multi = fastapi.Depends(),
 ) -> tp.Any:
     applications = await filters.get_close_wo_completion_second(db=db, log=log)
-    log.msg(len(applications))
     return applications
 
 
@@ -47,10 +46,8 @@ async def update_async_anomalies(
         rules = ["first", "second", "third", "fourth", "fifth"]
 
         async def _update_anomalies(rule: str, db: aorm.AsyncSession, log: tp.Any):
-            log.msg(rule)
             filter_func = getattr(filters, f"get_close_wo_completion_{rule}")
             applications = await filter_func(db=db, log=log)
-            log.msg(len(applications))
             await db_queries.update_applications_is_anomaly(ids=[application["id"] for application in applications], db=db, log=log)
 
         tasks = []
@@ -60,7 +57,6 @@ async def update_async_anomalies(
             )
         
         result = await aio.gather(*tasks, return_exceptions=True)
-        log.msg(result)
         
     except Exception:
         pass
@@ -90,11 +86,10 @@ async def update_anomalies(
         for rule in rules:
             filter_func = getattr(filters, f"get_close_wo_completion_{rule}")
             applications = await filter_func(db=db, log=log)
-            log.msg(len(applications))
             await db_queries.update_applications_is_anomaly(ids=[application["id"] for application in applications], db=db, log=log)
         
-    except Exception:
-        pass
+    except Exception as e:
+        log.msg(str(e))
     finally:
         is_anomaly_update_started = False
     return True

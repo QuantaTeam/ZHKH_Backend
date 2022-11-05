@@ -247,7 +247,7 @@ async def update_applications_is_anomaly(
             """
             UPDATE application
             SET is_anomaly = True
-            WHERE id IN (:ids);
+            WHERE id = ANY(:ids);
             """
         ).bindparams(ids=ids)
     )
