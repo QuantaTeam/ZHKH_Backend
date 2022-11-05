@@ -24,14 +24,12 @@ WORKDIR $GOPATH/src/mypackage/gerda/
 
 COPY go.mod go.sum ./
 
-RUN --mount=type=cache,target=/go/pkg/mod \
-    GOMODCACHE=/go/pkg/mod go mod download all
+RUN GOMODCACHE=/go/pkg/mod go mod download all
 RUN go mod verify
 
 COPY . .
 
-RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg/mod \
-    GOCACHE=/root/.cache/go-build GOMODCACHE=/go/pkg/mod \
+RUN GOCACHE=/root/.cache/go-build GOMODCACHE=/go/pkg/mod \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOGC=off go build \
     -ldflags='-w -s -extldflags "-static"' -a \
     -o /go/bin/app ./cmd/gerda/.

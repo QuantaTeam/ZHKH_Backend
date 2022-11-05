@@ -62,6 +62,7 @@ async def update_async_anomalies(
         pass
     finally:
         is_async_anomaly_update_started = False
+        await db.commit()
     return True
 
 
@@ -92,4 +93,5 @@ async def update_anomalies(
         log.msg(str(e))
     finally:
         is_anomaly_update_started = False
+        await db.commit()
     return True

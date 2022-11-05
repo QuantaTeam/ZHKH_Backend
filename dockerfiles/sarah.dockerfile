@@ -10,8 +10,7 @@ COPY pyproject.toml pdm.lock /project/
 COPY sarah/ /project/sarah
 
 WORKDIR /project
-RUN --mount=type=cache,target=/project/pkgs \
-    pdm install --prod --no-lock --no-editable
+RUN pdm install --prod --no-lock --no-editable
 
 FROM ${DOCKER_IMAGE_PREFIX}python:3.10
 
