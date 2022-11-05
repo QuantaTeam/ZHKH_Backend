@@ -106,7 +106,7 @@ async def get_applications(
     query: str | None = fastapi.Query(default=None),
     with_comment: bool | None = fastapi.Query(default=None),
     result_desc: list[str] | None = fastapi.Query(default=None),
-    urgency list[str] | None = fastapi.Query(default=None),
+    urgency: list[str] | None = fastapi.Query(default=None),
 ) -> typing.Any:
     filters = {
         "Наименование категории дефекта": defect_category_name,
