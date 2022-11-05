@@ -20,13 +20,13 @@ docker-compose push
 # (echo -e "version: '3.9'\n";  docker compose -f docker-compose.yml config) > docker-stack.yml
 just compose-config
 
-ssh -tt -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PATH}/environment"
-ssh -tt -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PATH}/frontend"
+ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PATH}/environment"
+ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" "mkdir -p ${PROJECT_PATH}/frontend"
 
-scp -o IdentitiesOnly=yes docker-stack.yml .env "${SSH_SERVER_NAME}:${PROJECT_PATH}/"
-scp -o IdentitiesOnly=yes -r environment "${SSH_SERVER_NAME}:${PROJECT_PATH}"
+scp docker-stack.yml .env "${SSH_SERVER_NAME}:${PROJECT_PATH}/"
+scp -r environment "${SSH_SERVER_NAME}:${PROJECT_PATH}"
 rsync -azvc --delete db "${SSH_SERVER_NAME}:${PROJECT_PATH}"
 
-ssh -tt -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "${SSH_SERVER_NAME}" \
+ssh -tt -o StrictHostKeyChecking=no "${SSH_SERVER_NAME}" \
 	"docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASSWORD} ${DOCKER_REGISTRY} \
 && cd ${PROJECT_PATH} && docker stack deploy -c docker-stack.yml --with-registry-auth $STACK_NAME"
