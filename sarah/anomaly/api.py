@@ -11,7 +11,8 @@ from sarah.anomaly import db as db_queries
 is_anomaly_update_started: bool = False
 is_async_anomaly_update_started: bool = False
 current_rule: int = 0
-general_rules: tp.List[str] = ["first", "second", "third", "fourth", "fifth"]
+# general_rules: tp.List[str] = ["first", "second", "third", "fourth", "fifth", "sixth"]
+general_rules: tp.List[str] = ["second"]
 
 
 router: fastapi.APIRouter = fastapi.APIRouter()

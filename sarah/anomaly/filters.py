@@ -175,3 +175,16 @@ async def get_close_wo_completion_fifth(
     anomaly_applications = await _get_anomaly_applications(applications, anomaly_criteria, log)
     
     return anomaly_applications
+
+
+async def get_close_wo_completion_sixth(
+    *,
+    db: aorm.AsyncSession,
+    log: tp.Any,
+) -> tp.List[dict]:    
+    # group applications to dict with applicant_id_name_of_defect
+    anomaly_applications = []
+    async for yield_applications in db_queries.get_close_wo_completion_sixth(db=db, log=log):
+        anomaly_applications.extend(yield_applications)
+    
+    return anomaly_applications

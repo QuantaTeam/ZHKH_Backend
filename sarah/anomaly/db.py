@@ -80,7 +80,7 @@ async def get_close_wo_completion_first(
 ) -> tp.List[dict]:
     data = []
     _data = [0]
-    i = 1
+    i = 0
     while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
         query = await db.stream(
             sqlalchemy.text(
@@ -104,7 +104,7 @@ async def get_close_wo_completion_first(
             execution_options={"yield_per": batch_size, "stream_results": True}
         )
         _data = await query.mappings().fetchmany()
-        data.extend(await query.mappings().fetchmany())
+        data.extend(_data)
         i += 1
     yield data
 
@@ -116,7 +116,7 @@ async def get_close_wo_completion_second(
 ) -> tp.List[dict]:
     data = []
     _data = [0]
-    i = 1
+    i = 0
     while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
         query = await db.stream(
             sqlalchemy.text(
@@ -141,7 +141,7 @@ async def get_close_wo_completion_second(
             execution_options={"yield_per": batch_size, "stream_results": True}
         )
         _data = await query.mappings().fetchmany()
-        data.extend(await query.mappings().fetchmany())
+        data.extend(_data)
         i += 1
     yield data
 
@@ -153,7 +153,7 @@ async def get_close_wo_completion_third(
 ) -> tp.List[dict]:
     data = []
     _data = [0]
-    i = 1
+    i = 0
     while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
         query = await db.stream(
             sqlalchemy.text(
@@ -177,7 +177,7 @@ async def get_close_wo_completion_third(
             execution_options={"yield_per": batch_size, "stream_results": True}
         )
         _data = await query.mappings().fetchmany()
-        data.extend(await query.mappings().fetchmany())
+        data.extend(_data)
         i += 1
     yield data
 
@@ -189,7 +189,7 @@ async def get_close_wo_completion_fourth(
 ) -> tp.List[dict]:
     data = []
     _data = [0]
-    i = 1
+    i = 0
     while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
         query = await db.stream(
             sqlalchemy.text(
@@ -213,7 +213,7 @@ async def get_close_wo_completion_fourth(
             execution_options={"yield_per": batch_size, "stream_results": True}
         )
         _data = await query.mappings().fetchmany()
-        data.extend(await query.mappings().fetchmany())
+        data.extend(_data)
         i += 1
     yield data
 
@@ -225,7 +225,7 @@ async def get_close_wo_completion_fifth(
 ) -> tp.List[dict]:
     data = []
     _data = [0]
-    i = 1
+    i = 0
     while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
         query = await db.stream(
             sqlalchemy.text(
@@ -248,7 +248,40 @@ async def get_close_wo_completion_fifth(
             execution_options={"yield_per": batch_size, "stream_results": True}
         )
         _data = await query.mappings().fetchmany()
-        data.extend(await query.mappings().fetchmany())
+        data.extend(_data)
+        i += 1
+    yield data
+
+
+async def get_close_wo_completion_sixth(
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 100000
+) -> tp.List[dict]:
+    data = []
+    _data = [0]
+    i = 0
+    while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
+        query = await db.stream(
+            sqlalchemy.text(
+                """
+                SELECT
+                    id,
+                    "Дата закрытия",
+                    "Наименование дефекта",
+                    "Идентификатор дефекта",
+                    applicant_id,
+                    application.application_creation_timestamp as application_creation_timestamp
+                FROM application
+                WHERE "Наименование статуса заявки" NOT IN ('Закрыта', 'Закрыта через МАРМ')
+                    AND (is_anomaly is false or is_anomaly is null)
+                OFFSET :offset LIMIT :batch_size;
+                """
+            ).bindparams(offset=batch_size*i, batch_size=batch_size),
+            execution_options={"yield_per": batch_size, "stream_results": True}
+        )
+        _data = await query.mappings().fetchmany()
+        data.extend(_data)
         i += 1
     yield data
 
