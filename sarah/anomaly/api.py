@@ -10,6 +10,9 @@ from sarah.anomaly import db as db_queries
 
 is_anomaly_update_started: bool = False
 is_async_anomaly_update_started: bool = False
+current_rule: int = 0
+general_rules: tp.List[str] = ["first", "second", "third", "fourth", "fifth"]
+
 
 router: fastapi.APIRouter = fastapi.APIRouter()
 
@@ -77,21 +80,25 @@ async def update_anomalies(
     multi: deps.Multi = fastapi.Depends(),
 ) -> tp.Any:
     global is_anomaly_update_started
+    global current_rule
+    global general_rules
 
     if is_anomaly_update_started:
         return False
     is_anomaly_update_started = True
     try:
-        rules = ["first", "second", "third", "fourth", "fifth"]
-
-        for rule in rules:
-            filter_func = getattr(filters, f"get_close_wo_completion_{rule}")
-            applications = await filter_func(db=db, log=log)
-            await db_queries.update_applications_is_anomaly(ids=[application["id"] for application in applications], db=db, log=log)
+        rule = general_rules[current_rule]
+        log.msg("[Anomaly] Rule for anomaly to filter is " + rule)
+        filter_func = getattr(filters, f"get_close_wo_completion_{rule}")
+        applications = await filter_func(db=db, log=log)
+        log.msg(f"[Anomaly] Found {len(applications)} applications")
+        await db_queries.update_applications_is_anomaly(ids=[application["id"] for application in applications], db=db, log=log)
+        
         
     except Exception as e:
-        log.msg(str(e))
+        log.msg("[Anomaly]" + str(e))
     finally:
         is_anomaly_update_started = False
+        current_rule = current_rule + 1 if current_rule < len(general_rules) - 1 else 0
         await db.commit()
     return True

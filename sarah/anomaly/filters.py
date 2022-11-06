@@ -41,7 +41,7 @@ async def _get_anomaly_applications(
         for i in range(len(applications_group) - 1):
             if (applications_group[i + 1]["application_creation_timestamp"] - applications_group[i]["application_creation_timestamp"]).seconds < max_time*3600:
                 anomaly_applications_with_duplicates.extend(applications_group[i:i + 1])
-    
+
     # delete duplicated applications by id
     ids = []
     for application in anomaly_applications_with_duplicates:
@@ -69,7 +69,7 @@ async def get_close_wo_completion_first(
     anomaly_criteria = await db_queries.get_anomaly_criteria(db=db, log=log)
 
     anomaly_applications = await _get_anomaly_applications(applications, anomaly_criteria, log)
-    
+
     return anomaly_applications
 
 
