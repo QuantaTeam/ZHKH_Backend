@@ -283,7 +283,109 @@ async def get_close_wo_completion_sixth(
         _data = await query.mappings().fetchmany()
         data.extend(_data)
         i += 1
-    yield data
+    return data
+
+
+async def get_close_wo_completion_seventh(
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 100000
+) -> tp.List[dict]:
+    data = []
+    _data = [0]
+    i = 0
+    while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
+        query = await db.stream(
+            sqlalchemy.text(
+                """
+                SELECT
+                    id,
+                    "Дата закрытия",
+                    "Наименование дефекта",
+                    "Идентификатор дефекта",
+                    applicant_id,
+                    application.application_creation_timestamp as application_creation_timestamp
+                FROM application
+                WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
+                    AND "Оценка качества выполнения работ" IN ('Плохо', 'Неудовлетворительно')
+                    AND (is_anomaly is false or is_anomaly is null)
+                OFFSET :offset LIMIT :batch_size;
+                """
+            ).bindparams(offset=batch_size*i, batch_size=batch_size),
+            execution_options={"yield_per": batch_size, "stream_results": True}
+        )
+        _data = await query.mappings().fetchmany()
+        data.extend(_data)
+        i += 1
+    return data
+
+
+async def get_close_wo_completion_eighth(
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 100000
+) -> tp.List[dict]:
+    data = []
+    _data = [0]
+    i = 0
+    while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
+        query = await db.stream(
+            sqlalchemy.text(
+                """
+                SELECT
+                    id,
+                    "Дата закрытия",
+                    "Наименование дефекта",
+                    "Идентификатор дефекта",
+                    applicant_id,
+                    application.application_creation_timestamp as application_creation_timestamp
+                FROM application
+                WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
+                    AND COALESCE(EXTRACT(epoch FROM "Дата отзыва/оценки"::timestamp - application.application_creation_timestamp), 0) / 60 < 10
+                    AND (is_anomaly is false or is_anomaly is null)
+                OFFSET :offset LIMIT :batch_size;
+                """
+            ).bindparams(offset=batch_size*i, batch_size=batch_size),
+            execution_options={"yield_per": batch_size, "stream_results": True}
+        )
+        _data = await query.mappings().fetchmany()
+        data.extend(_data)
+        i += 1
+    return data
+
+
+async def get_close_wo_completion_nineth(
+    db: aorm.AsyncSession,
+    log: tp.Any,
+    batch_size: int = 100000
+) -> tp.List[dict]:
+    data = []
+    _data = [0]
+    i = 0
+    while i != int(DATABASE_APPLICATIONS_AMOUNT / batch_size):
+        query = await db.stream(
+            sqlalchemy.text(
+                """
+                SELECT
+                    id,
+                    "Дата закрытия",
+                    "Наименование дефекта",
+                    "Идентификатор дефекта",
+                    applicant_id,
+                    application.application_creation_timestamp as application_creation_timestamp
+                FROM application
+                WHERE "Наименование статуса заявки" IN ('Закрыта', 'Закрыта через МАРМ')
+                    AND COALESCE(EXTRACT(epoch FROM "Дата отзыва/оценки"::timestamp - application.application_creation_timestamp), 0) / 60 < 1
+                    AND (is_anomaly is false or is_anomaly is null)
+                OFFSET :offset LIMIT :batch_size;
+                """
+            ).bindparams(offset=batch_size*i, batch_size=batch_size),
+            execution_options={"yield_per": batch_size, "stream_results": True}
+        )
+        _data = await query.mappings().fetchmany()
+        data.extend(_data)
+        i += 1
+    return data
 
 
 async def update_applications_is_anomaly(
@@ -296,7 +398,7 @@ async def update_applications_is_anomaly(
         sqlalchemy.text(
             """
             UPDATE application
-            SET is_anomaly = True
+            SET is_anomaly = true
             WHERE id = ANY(:ids);
             """
         ).bindparams(ids=ids)
