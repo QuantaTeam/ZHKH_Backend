@@ -205,11 +205,12 @@ async def get_close_wo_completion_eighth(
     """
     temporariy deprecated, due to 330 000 / 500 000 anomalies
     """
+    return []
     #  дата создания - timestamp_start (timestamp wo tz)
-    short_defects_ids = await db_queries.get_short_defects_ids(db=db, log=log)
+    # short_defects_ids = await db_queries.get_short_defects_ids(db=db, log=log)
 
-    applications = await db_queries.get_close_wo_completion_eighth(db=db, log=log)
-    return [application for application in applications if application["Идентификатор дефекта"] not in short_defects_ids]
+    # applications = await db_queries.get_close_wo_completion_eighth(db=db, log=log)
+    # return [application for application in applications if application["Идентификатор дефекта"] not in short_defects_ids]
 
 
 """
