@@ -181,10 +181,49 @@ async def get_close_wo_completion_sixth(
     *,
     db: aorm.AsyncSession,
     log: tp.Any,
-) -> tp.List[dict]:    
-    # group applications to dict with applicant_id_name_of_defect
-    anomaly_applications = []
-    async for yield_applications in db_queries.get_close_wo_completion_sixth(db=db, log=log):
-        anomaly_applications.extend(yield_applications)
-    
-    return anomaly_applications
+) -> tp.List[dict]:
+    return await db_queries.get_close_wo_completion_sixth(db=db, log=log)
+
+
+async def get_close_wo_completion_seventh(
+    *,
+    db: aorm.AsyncSession,
+    log: tp.Any,
+) -> tp.List[dict]:
+    return await db_queries.get_close_wo_completion_seventh(db=db, log=log)
+
+
+"""
+Если отзыв проставлен меньше чем за 10 минут с момента создания заявки,
+ в случае если причина заявки не входит в пулл задач, которые можно выполнить за 10 минут
+"""
+async def get_close_wo_completion_eighth(
+    *,
+    db: aorm.AsyncSession,
+    log: tp.Any,
+) -> tp.List[dict]:
+    """
+    temporariy deprecated, due to 330 000 / 500 000 anomalies
+    """
+    return []
+    #  дата создания - timestamp_start (timestamp wo tz)
+    # short_defects_ids = await db_queries.get_short_defects_ids(db=db, log=log)
+
+    # applications = await db_queries.get_close_wo_completion_eighth(db=db, log=log)
+    # return [application for application in applications if application["Идентификатор дефекта"] not in short_defects_ids]
+
+
+"""
+Если отзыв проставлен меньше чем за 1 минуту с момента создания заявки для типа задач,
+которые входят в пулл задач, которые могут быть решены за 10 минут
+"""
+async def get_close_wo_completion_nineth(
+    *,
+    db: aorm.AsyncSession,
+    log: tp.Any,
+) -> tp.List[dict]:
+    short_defects_ids = await db_queries.get_short_defects_ids(db=db, log=log)
+
+    applications = await db_queries.get_close_wo_completion_nineth(db=db, log=log)
+    return [application for application in applications if application["Идентификатор дефекта"] in short_defects_ids]
+
